@@ -216,6 +216,21 @@ body[data-tema="escuro"] { background: var(--cor-deep-dark); }
     transparent 92%);
 }
 
+/* D4 (Juxtapose) — exceção auditada, só aqui: 82% achatava demais a diferença
+   tonal entre "Antes" e "Depois" (o halo quente da luminária acesa em Depois
+   é o principal diferenciador, e ficava quase invisível sob o scrim padrão).
+   65% é o menor valor com margem real acima do piso de leitura medido
+   (pior caso ~58% nos breakpoints mais exigentes, 1280–1366px de largura) —
+   ver auditoria completa no CLAUDE.md §8.2. D5/D6 continuam em 82%: a regra
+   genérica acima não muda, só esta sobrescreve, escopada por ID. */
+#dobra-4 .dobra__scrim {
+  background: linear-gradient(to bottom,
+    transparent 0%,
+    color-mix(in srgb, var(--cor-deep-dark) 65%, transparent) 12%,
+    color-mix(in srgb, var(--cor-deep-dark) 65%, transparent) 76%,
+    transparent 92%);
+}
+
 .dobra__conteudo {
   max-width: var(--largura-conteudo);
   margin-inline: auto;

@@ -146,6 +146,21 @@ Toda mídia de dobra vive dentro de `.dobra__media`, que carrega **obrigatoriame
 
 Elementos de UI **nunca** entram na `.dobra__media` — só mídia. Texto, CTA e eyebrow vivem na `.dobra__conteudo`, que não é mascarada.
 
+### 8.2 SCRIM DA D4 — exceção auditada (65%, não 82%)
+
+O `.dobra__scrim` genérico (`[data-tema="escuro"]`, `--cor-deep-dark` a 82%) serve D5 e D6 sem ajuste. A **D4 é exceção**, escopada por `#dobra-4 .dobra__scrim` — investigação de ago/2026, motivada por suspeita de que o scrim estivesse achatando a diferença tonal entre "Antes" e "Depois" (o par Juxtapose).
+
+**Medição (canvas, luminância WCAG relativa, pixel a pixel, na região real coberta pelo texto — eyebrow/título/parágrafo — replicando o recorte `object-fit: cover` + overscan de 130% da foto real):**
+
+1. **Sem scrim, o texto falha:** pior caso de contraste (pixel mais claro sob o texto, tipicamente o halo da luminária acesa em "Depois" ou o brilho do notebook) cai para **1,08–1,33:1** — muito abaixo do mínimo de 4,5:1. **O scrim não é decoração, é necessidade de leitura**: sem ele, o texto seria ilegível em cima das fotos reais.
+2. **Achatamento confirmado:** a 82%, a diferença de luminância média entre A e B na região do texto cai entre 38% e 55% (varia por breakpoint — ex.: de 43,8% "bruto" para 27% em 1280×800). O halo quente da luminária, que é o principal sinal visual de "Depois", fica visualmente abafado.
+3. **Piso de leitura, medido em 5 tamanhos de tela** (375px, 390px, 1280×800, 1366×768, 1920×1080 — a proporção da tela muda QUAL parte da foto o `object-fit: cover` revela sob o texto, então o piso varia por breakpoint, não é constante): pior caso ≈ **57,5–58%**, nos dois breakpoints de laptop mais comuns (1280×800 e 1366×768) — não é uma relação simples de "tela mais larga = mais exigente": 1920×1080 testou mais folgado (~53%) que os dois anteriores, porque muda o eixo que o `cover` corta (largura vs. altura).
+4. **65% escolhido:** folga real acima do piso medido (pior caso ≥5,9:1 nos breakpoints mais exigentes — ~30% de margem sobre os 4,5:1 mínimos) e recupera parte da diferenciação tonal (35,6% de diferença preservada em 1280×800, contra 27% em 82%). Não é o mínimo absoluto (~58%) — a folga é deliberada, dado que a medição amostra alguns tamanhos de tela reais, não todos os possíveis.
+
+**Resultado:** a diferença entre "Antes" e "Depois" ficou mais perceptível, mas **ainda é modesta mesmo sem nenhum scrim** — as duas fotos são, por composição, cenas "deep dark studio" (decisão travada), então o diferencial real está concentrado na luz da luminária (localizada), não num clareamento geral do quadro. Se a Direção Criativa quiser uma diferença tonal mais dramática entre A e B, isso é decisão de **regerar as fotos** com mais contraste de cor/luz entre si — fora do escopo desta auditoria, que tratou só do CSS.
+
+**Se a janela do scrim mudar** (a faixa 12%–76%/rampa até 92%, ou a posição do texto na D4), refaça esta auditoria — o piso de 65% foi calibrado para a composição atual, não é uma constante universal.
+
 ## 9. CONVENÇÕES DE CÓDIGO
 
 - HTML semântico: `<section class="dobra">`, `<header>`, `<main>`, `<footer>`. Cada dobra tem `id` e `data-tema="claro|escuro"`.
