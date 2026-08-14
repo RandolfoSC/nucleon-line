@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inscrição — Instituto Núcleon-line</title>
+  <meta name="description" content="Inicie sua trajetória com o Instituto Núcleon-line: preencha seus dados e comece agora." />
+
+  <!-- Tipografia oficial: Sora (display) + Figtree (texto) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="../css/tokens.css" />
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<!-- Tema fixo `escuro`: página de app de tela única, sem scrollytelling —
+     não carrega o Arco de Luz. Continua visualmente de onde a Dobra 6 termina
+     (é o destino do CTA Master dela), reaproveitando --cor-deep-dark e a
+     mesma lógica [data-tema] de tinta. Mesmo padrão do Hub IA. -->
+<body data-tema="escuro">
+
+  <header class="header hub-topo">
+    <a class="header__marca" href="../index.html" aria-label="Instituto Núcleon-line — início">
+      <img class="header__logo header__logo--clara" src="../assets/svg/logo-nucleon-claro.svg" alt="Instituto Núcleon-line" width="658" height="154" />
+      <img class="header__logo header__logo--escura" src="../assets/svg/logo-nucleon-escuro.svg" alt="Instituto Núcleon-line" width="658" height="154" />
+    </a>
+  </header>
+
+  <main class="inscricao">
+    <div class="cartao-inscricao" data-estado="form">
+
+      <div class="inscricao-etapa inscricao-etapa--form">
+        <p class="eyebrow">Núcleo 06 — A Sua Vez</p>
+        <h1 class="titulo">Chegou a sua vez.</h1>
+        <p class="paragrafo">Preencha seus dados e comece sua trajetória com a gente.</p>
+
+        <form class="inscricao-form" id="form-inscricao" novalidate>
+          <div class="campo">
+            <label for="nome">Nome completo</label>
+            <input type="text" id="nome" name="nome" autocomplete="name" required />
+          </div>
+
+          <div class="campo">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" name="email" autocomplete="email" required />
+          </div>
+
+          <div class="campo">
+            <label for="telefone">Telefone / WhatsApp</label>
+            <input type="tel" id="telefone" name="telefone" autocomplete="tel" placeholder="(11) 91234-5678" required />
+          </div>
+
+          <div class="campo">
+            <label for="interesse">Tenho interesse como</label>
+            <select id="interesse" name="interesse" required>
+              <option value="" disabled selected>Selecione uma opção</option>
+              <option value="jovem">Jovem — quero estudar</option>
+              <option value="empresa">Empresa — quero treinar minha equipe</option>
+              <option value="gestao-publica">Gestão Pública — quero investir na minha cidade</option>
+            </select>
+          </div>
+
+          <button type="submit" class="cta cta--master">Confirmar Inscrição</button>
+        </form>
+      </div>
+
+      <div class="inscricao-etapa inscricao-etapa--sucesso" role="status" tabindex="-1">
+        <span class="nucleo-orbe inscricao-etapa__nucleo" aria-hidden="true"></span>
+        <h2 class="titulo">Inscrição recebida!</h2>
+        <p class="paragrafo">Recebemos sua inscrição! Em breve entraremos em contato.</p>
+      </div>
+
+    </div>
+
+    <a class="link-hub link-hub--voltar" href="../index.html">Voltar à Home</a>
+  </main>
+
+  <script src="../js/inscricao.js"></script>
+</body>
+</html>
