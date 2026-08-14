@@ -1,8 +1,9 @@
 /* ==========================================================================
-   MAIN.JS — Instituto Núcleon-line · Fase 1 (Fundação)
+   MAIN.JS — Instituto Núcleon-line · Fases 1–2 (Fundação + Esqueleto narrativo)
    Módulos: Movimento reduzido · Header Smart · Menu mobile · Arco de Luz
-            · Tema por dobra · Âncoras suaves
-   Fases futuras adicionam: parallax/órbitas (F2), Juxtapose (F3), Scroll-Back (F4)
+            · Tema por dobra · Parallax das fotos · Órbita da Dobra 1
+            · Âncoras suaves
+   Fases futuras adicionam: Juxtapose (F3), Scroll-Back (F4)
    ========================================================================== */
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
@@ -11,9 +12,11 @@ gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
    MOVIMENTO REDUZIDO (regra do CLAUDE.md §6)
    O usuário pode ligar/desligar a preferência com o site aberto — por isso a
    consulta é observada, não lida uma vez só.
-   Isto é a PREPARAÇÃO do guard: expõe o estado e um canal de inscrição.
-   O guard de fato (matar parallax, órbitas e o pin) chega na Fase 2/3, que
-   se inscreve aqui via aoMudarMovimento().
+   Expõe o estado (movimentoReduzido()) e um canal de inscrição
+   (aoMudarMovimento()). O guard de fato nasce aqui na Fase 2: initParallax()
+   e initOrbitaD1() se inscrevem neste canal em vez de ler a media query de
+   novo — cada um destrói/recria seus próprios ScrollTriggers ao alternar.
+   O pin do Juxtapose (Fase 3) se inscreve do mesmo jeito quando chegar.
    -------------------------------------------------------------------------- */
 const consultaMovimento = window.matchMedia("(prefers-reduced-motion: reduce)");
 let movimentoReduzidoAtivo = consultaMovimento.matches;
@@ -213,6 +216,145 @@ function initTemaPorDobra() {
 }
 
 /* --------------------------------------------------------------------------
+   PARALLAX DAS FOTOS (Fase 2)
+   Desloca .dobra__foto dentro do próprio container (.dobra__media[data-parallax])
+   via transform — nunca top/left/width (§6). A D4 fica de fora: o par
+   Antes/Depois é estático até o pin com clip-path da Fase 3 (Juxtapose).
+   A foto chega centralizada pelo CSS com height:130% + transform:
+   translate(-50%,-50%) (o overscan da decisão 5). Essa centralização é
+   replicada aqui via xPercent/yPercent — GSAP compõe percentual e pixels
+   num único transform — para o deslocamento do parallax (um `y` em px)
+   entrar por cima sem brigar com a base. A própria height:130% do CSS não
+   é tocada, só o transform anima dentro dela, como pedido.
+   Alcance: ±12% da altura do CONTAINER, não da foto (regra do §6). Os 15%
+   de folga de cada lado do overscan de 30% cobrem esse curso com margem.
+   `end`/`start` cobrem o trajeto inteiro da dobra na viewport (de "começa a
+   entrar por baixo" a "termina de sair por cima") para o movimento ficar
+   perceptível sem ser abrupto. `invalidateOnRefresh` recalcula o alcance
+   (função, não valor fixo) sempre que ScrollTrigger.refresh() rodar —
+   inclusive no refresh disparado pela troca de prefers-reduced-motion.
+   -------------------------------------------------------------------------- */
+let tweensParallax = [];
+
+function construirParallax() {
+  document.querySelectorAll(".dobra__media[data-parallax]").forEach((media) => {
+    const foto = media.querySelector(".dobra__foto");
+    const dobra = media.closest(".dobra");
+    if (!foto || !dobra) return;
+
+    gsap.set(foto, { xPercent: -50, yPercent: -50 });
+
+    const tween = gsap.fromTo(
+      foto,
+      { y: () => -(media.offsetHeight * 0.12) },
+      {
+        y: () => media.offsetHeight * 0.12,
+        ease: "none",
+        scrollTrigger: {
+          trigger: dobra,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: true,
+          invalidateOnRefresh: true,
+        },
+      }
+    );
+
+    tweensParallax.push(tween);
+  });
+}
+
+function destruirParallax() {
+  // kill() na tween criada com scrollTrigger nas vars também mata o
+  // ScrollTrigger associado — não precisa matar os dois separadamente.
+  tweensParallax.forEach((tween) => tween.kill());
+  tweensParallax = [];
+
+  // Estado exigido sob movimento reduzido: foto parada, centralizada, sem
+  // nenhum resquício do deslocamento de parallax.
+  document.querySelectorAll(".dobra__media[data-parallax] .dobra__foto").forEach((foto) => {
+    gsap.set(foto, { xPercent: -50, yPercent: -50, y: 0 });
+  });
+}
+
+function initParallax() {
+  if (!movimentoReduzido()) construirParallax();
+
+  aoMudarMovimento((reduzido) => {
+    if (reduzido) destruirParallax();
+    else construirParallax();
+  });
+}
+
+/* --------------------------------------------------------------------------
+   ÓRBITA DA DOBRA 1 (Fase 2)
+   Os três núcleos flutuantes (.placeholder__nucleo[data-orbita]) já têm uma
+   posição de repouso fixada via top/right no CSS — essa posição É o centro
+   da órbita, não o ponto animado em si. Só o deslocamento extra (um círculo
+   achatado ao redor desse centro) é animado, sempre via transform.
+   Diferente da órbita em CSS de pages/em-breve.html (que gira no tempo, com
+   @keyframes), esta é sincronizada ao scroll da própria Dobra 1: o ângulo é
+   uma função direta do progresso do ScrollTrigger, então reverter o scroll
+   reverte o movimento exatamente pelo mesmo caminho — sem inércia, sem
+   estado próprio de animação.
+   Raio = metade do diâmetro do próprio núcleo, lido do layout renderizado a
+   cada atualização (nunca duplicado como número fixo em JS, mesma regra do
+   §9 aplicada a uma medida em vez de uma cor) — por isso acompanha sozinho
+   o clamp() do CSS em qualquer largura de tela, do mobile ao desktop, sem
+   precisar ouvir resize à parte.
+   Defasagem de 120° entre os três (mesma linguagem visual da órbita do Em
+   Breve), para não orbitarem em bloco, como um único corpo rígido.
+   -------------------------------------------------------------------------- */
+let triggersOrbitaD1 = [];
+
+function construirOrbitaD1() {
+  const dobra1 = document.getElementById("dobra-1");
+  const nucleos = dobra1 ? dobra1.querySelectorAll("[data-orbita]") : [];
+  if (!nucleos.length) return;
+
+  nucleos.forEach((nucleo, indice) => {
+    const faseInicial = (indice / nucleos.length) * Math.PI * 2;
+
+    const trigger = ScrollTrigger.create({
+      trigger: dobra1,
+      start: "top bottom",
+      end: "bottom top",
+      scrub: true,
+      onUpdate(self) {
+        const raio = nucleo.offsetWidth * 0.5;
+        const angulo = faseInicial + self.progress * Math.PI * 2;
+        gsap.set(nucleo, {
+          x: Math.cos(angulo) * raio,
+          y: Math.sin(angulo) * raio * 0.6, // achata a órbita — mais "suave" que um círculo perfeito
+        });
+      },
+    });
+
+    triggersOrbitaD1.push(trigger);
+  });
+}
+
+function destruirOrbitaD1() {
+  triggersOrbitaD1.forEach((trigger) => trigger.kill());
+  triggersOrbitaD1 = [];
+
+  // Estado exigido sob movimento reduzido: núcleos parados na posição
+  // central definida pelo CSS (top/right), sem deslocamento nenhum.
+  document.querySelectorAll("#dobra-1 [data-orbita]").forEach((nucleo) => {
+    gsap.set(nucleo, { x: 0, y: 0 });
+  });
+}
+
+function initOrbitaD1() {
+  if (!movimentoReduzido()) construirOrbitaD1();
+
+  aoMudarMovimento((reduzido) => {
+    if (reduzido) destruirOrbitaD1();
+    else construirOrbitaD1();
+  });
+}
+
+/* --------------------------------------------------------------------------
    ÂNCORAS SUAVES
    Substitui o `scroll-behavior: smooth` global, que conflitava com o
    ScrollTrigger e atrapalharia o Scroll-Back da Fase 4.
@@ -263,6 +405,8 @@ initHeaderSmart();
 initMenuMobile();
 initArcoDeLuz();
 initTemaPorDobra();
+initParallax();
+initOrbitaD1();
 initAncorasSuaves();
 
 aoMudarMovimento((reduzido) => {
