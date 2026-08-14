@@ -442,14 +442,35 @@ body[data-tema="escuro"] { background: var(--cor-deep-dark); }
   padding-bottom: clamp(2.5rem, 9vh, 6rem);
 }
 
-/* Par Juxtapose (D4): empilhados; o arrastar via scroll entra na Fase 3.
-   A divisória de hoje é só o clip-path estático abaixo — não mexer nisso
-   ainda. Ele recorta o wrapper inteiro, foto incluída. */
+/* Par Juxtapose (D4): empilhados; o arrastar via scroll é controlado pelo
+   ScrollTrigger com pin (Fase 3, main.js → initJuxtaposeD4()). O clip-path
+   abaixo é o ESTADO DE REPOUSO — split 50/50 estático — que vale como
+   ponto de partida antes do JS assumir E como fallback completo sob
+   prefers-reduced-motion (destruirJuxtaposeD4() devolve exatamente a este
+   valor). Ele recorta o wrapper inteiro, foto incluída. */
 .placeholder--d4a,
 .placeholder--d4b { position: absolute; inset: 0; }
 .placeholder--d4b {
-  clip-path: inset(0 0 0 50%);   /* estado inicial estático da barra */
+  clip-path: inset(0 0 0 50%);   /* estado de repouso — ver comentário acima */
 }
+
+/* Barra divisória do Juxtapose: feedback visual de que o scroll controla a
+   revelação diretamente (não é decoração — é o "cursor" da interação).
+   Repouso: centralizada na linha do split 50/50, mesma técnica de
+   .dobra__foto (âncora estática via left:50% + transform:translateX(-50%)
+   no CSS; o JS só soma um `x` em px por cima via GSAP, nunca toca left —
+   regra do §6). Sob prefers-reduced-motion o JS nem roda: esta é a posição
+   final, coerente com o clip-path 50/50 acima. */
+.juxtapose__divisoria {
+  position: absolute;
+  inset: 0 auto 0 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  background: var(--cor-ciano);
+  box-shadow: 0 0 10px 1px color-mix(in srgb, var(--cor-ciano) 45%, transparent);
+  pointer-events: none;
+}
+
 .placeholder__tag {
   position: absolute;
   top: 15%;                      /* abaixo da faixa de 12% que a máscara dissolve */
