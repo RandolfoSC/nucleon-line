@@ -1,0 +1,457 @@
+/* ==========================================================================
+   STYLE — Instituto Núcleon-line · Fase 1 (Fundação)
+   Grid das dobras, tipografia, Header Smart, Arco de Luz e placeholders.
+   ========================================================================== */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; }
+
+/* Sem `scroll-behavior: smooth` global: ele briga com o ScrollTrigger e com o
+   Scroll-Back da Fase 4. A rolagem suave é aplicada só nas âncoras, via GSAP
+   (main.js → initAncorasSuaves), que já respeita prefers-reduced-motion. */
+
+body {
+  font-family: var(--fonte-texto);
+  font-size: var(--texto-corpo);
+  color: var(--tinta-forte);
+  background: var(--cor-branco-luminoso); /* fallback sem JS */
+  transition: color var(--transicao-tema);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- Arco de Luz: camada fixa cujo background o GSAP interpola no scroll ---- */
+.arco-de-luz {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--cor-branco-luminoso);
+}
+
+/* ==========================================================================
+   HEADER SMART
+   ========================================================================== */
+.header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  height: var(--header-altura);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-inline: clamp(1.25rem, 4vw, 3rem);
+  transform: translateY(0);
+  transition: transform var(--transicao-header),
+              background-color var(--transicao-header),
+              backdrop-filter var(--transicao-header);
+}
+
+.header.oculto { transform: translateY(-100%); }
+
+.header.rolado {
+  background: color-mix(in srgb, var(--cor-branco-luminoso) 72%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+[data-tema="escuro"] .header.rolado {
+  background: color-mix(in srgb, var(--cor-deep-dark) 68%, transparent);
+}
+
+.header__marca {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+  color: var(--tinta-forte);
+  font-family: var(--fonte-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+}
+.header__nome em { font-style: normal; color: var(--cor-laranja); }
+
+/* A assinatura visual: o núcleo */
+.nucleo-orbe {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, var(--nucleo-brilho-laranja), var(--cor-laranja) 60%);
+  box-shadow: 0 0 12px 2px color-mix(in srgb, var(--cor-laranja) 55%, transparent);
+}
+
+.header__nav {
+  display: flex;
+  align-items: center;
+  gap: clamp(1rem, 2.5vw, 2rem);
+}
+.header__nav a {
+  text-decoration: none;
+  color: var(--tinta-suave);
+  font-size: 0.92rem;
+  font-weight: 500;
+  transition: color var(--transicao-micro);
+}
+.header__nav a:hover { color: var(--tinta-forte); }
+.header__nav a:focus-visible {
+  outline: 2px solid var(--cor-ciano);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+.header__acoes {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ---- Botão do menu mobile (antecipado da Fase 6: os links não podem sumir
+        sem substituto acessível por teclado em 390px) ---- */
+.header__toggle {
+  display: none;              /* só existe abaixo de 640px */
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 44px;                /* alvo de toque mínimo */
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--tinta-forte);
+  cursor: pointer;
+}
+.header__toggle:focus-visible {
+  outline: 2px solid var(--cor-ciano);
+  outline-offset: 2px;
+}
+.header__toggle-barra {
+  display: block;
+  width: 20px;
+  height: 2px;
+  margin-inline: auto;
+  background: currentColor;
+  transition: transform var(--transicao-micro);
+}
+/* Duas barras (gap 5px + 2px cada) → centros a ±3.5px do eixo: viram um X exato */
+.header.menu-aberto .header__toggle-barra:first-child  { transform: translateY(3.5px) rotate(45deg); }
+.header.menu-aberto .header__toggle-barra:last-child   { transform: translateY(-3.5px) rotate(-45deg); }
+
+/* ==========================================================================
+   DOBRAS — grid narrativo
+   ========================================================================== */
+.dobra {
+  position: relative;
+  min-height: 100svh;              /* decisão travada: NUNCA altura fixa */
+  display: grid;
+  align-items: center;
+  overflow: hidden;                /* corta o overscan das fotos no parallax */
+
+  /* Re-declara a tinta para que o seletor genérico [data-tema] da seção valha.
+     Sem esta linha o título herdaria a cor JÁ RESOLVIDA do <body> e ignoraria o
+     --tinta-forte da própria dobra — enquanto eyebrow e parágrafo, que declaram
+     color explicitamente, obedeceriam. Resultado: tintas diferentes na mesma dobra. */
+  color: var(--tinta-forte);
+  padding: calc(var(--header-altura) + var(--espaco-4)) clamp(1.25rem, 5vw, 4rem) var(--espaco-5);
+}
+
+.dobra__media {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  display: grid;
+  place-items: center;
+
+  /* MÁSCARA EM GRADIENTE — regra permanente de integração de imagens (CLAUDE.md §8).
+     Dissolve o topo e a base de TODA mídia de dobra no fundo global do Arco de Luz.
+     Sem ela, uma cena escura entrando numa tela clara (ou o inverso) desliza como
+     um retângulo de borda dura. Com ela, a costura entre dobras deixa de existir
+     em qualquer direção de scroll — e o arco fica livre para ser recalibrado.
+     A faixa central de 76% é a área 100% opaca: o sujeito da foto mora ali.
+     FASE 5: a <img>/<picture> real entra aqui com height ~130% para o parallax. */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);
+          mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);
+}
+
+.dobra__conteudo {
+  max-width: var(--largura-conteudo);
+  margin-inline: auto;
+  width: 100%;
+  display: grid;
+  gap: var(--espaco-3);
+}
+.dobra__conteudo--central { text-align: center; justify-items: center; }
+.dobra__conteudo--minimo  { align-self: end; }
+
+/* Composição travada da D6 (CLAUDE.md §2, decisão 7): o texto ocupa a faixa
+   superior da dobra; o elemento luminoso (orbe/mão) vive na faixa inferior.
+   `align-self: start` tira o conteúdo do centro vertical padrão de `.dobra`
+   (que colidiria com o orbe, também centralizado) e o ancora logo abaixo do
+   header — sem isso as duas composições disputam o mesmo ponto da tela em
+   qualquer largura. Vale para o placeholder e para a foto real da Fase 5. */
+.dobra__conteudo--superior {
+  align-self: start;
+  /* Reserva estrutural da faixa inferior, não estimativa de espaçamento:
+     este margin-bottom participa do fluxo do grid, então em janelas baixas
+     (ex.: mobile em paisagem) ele obriga a seção a crescer além de 100svh
+     em vez de comprimir sobre o orbe — é a decisão 4 do CLAUDE.md (alturas
+     fluidas, min-height nunca fixo) sendo o que garante, por construção,
+     que texto e elemento luminoso nunca dividem o mesmo espaço, em vez de
+     depender de padding percentual ajustado a olho em dois breakpoints. */
+  margin-bottom: clamp(9.5rem, 20vh, 14rem);
+}
+
+.dobra__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+  align-items: center;
+}
+
+/* ---- Tipografia narrativa ---- */
+.eyebrow {
+  font-family: var(--fonte-display);
+  font-weight: 600;
+  font-size: var(--texto-eyebrow);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tinta-suave);
+}
+
+.titulo {
+  font-family: var(--fonte-display);
+  font-weight: 800;
+  font-size: var(--texto-titulo);
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+  max-width: 18ch;
+}
+.titulo--hero { font-size: var(--texto-hero); }
+.dobra__conteudo--central .titulo { max-width: none; }
+
+.paragrafo {
+  color: var(--tinta-suave);
+  max-width: 46ch;
+  line-height: 1.6;
+}
+
+/* ==========================================================================
+   CTAs — contenção premium: pílula, sem gritos
+   ========================================================================== */
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--fonte-display);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  border-radius: var(--raio-cta);
+  padding: 0.85rem 1.7rem;
+  transition: transform var(--transicao-micro),
+              box-shadow var(--transicao-micro),
+              background-color var(--transicao-micro),
+              color var(--transicao-micro);
+}
+.cta:hover  { transform: translateY(-2px); }
+.cta:active { transform: translateY(0); }
+.cta:focus-visible {
+  outline: 2px solid var(--cor-ciano);
+  outline-offset: 3px;
+}
+
+.cta--primario {
+  background: var(--tinta-forte);
+  color: var(--cor-branco-luminoso);
+}
+[data-tema="escuro"] .cta--primario {
+  background: var(--cor-branco-luminoso);
+  color: var(--cor-deep-dark);
+}
+
+.cta--saiba-mais {
+  color: var(--tinta-forte);
+  padding-inline: 0.9rem;
+}
+.cta--saiba-mais::after {
+  content: "→";
+  transition: transform var(--transicao-micro);
+}
+.cta--saiba-mais:hover::after { transform: translateX(4px); }
+
+.cta--compacto {
+  background: var(--tinta-forte);
+  color: var(--cor-branco-luminoso);
+  padding: 0.55rem 1.2rem;
+  font-size: 0.88rem;
+}
+[data-tema="escuro"] .cta--compacto {
+  background: var(--cor-branco-luminoso);
+  color: var(--cor-deep-dark);
+}
+
+.cta--master {
+  background: linear-gradient(120deg, var(--cor-laranja), color-mix(in srgb, var(--cor-laranja) 70%, var(--cor-mostarda)));
+  color: var(--tinta-sobre-laranja);
+  padding: 1.05rem 2.4rem;
+  font-size: 1.05rem;
+  text-transform: uppercase;      /* copy oficial §4: INSCREVA-SE NO HUB AGORA */
+  letter-spacing: 0.06em;         /* respiro para as caixas altas do Sora */
+  box-shadow: 0 0 32px color-mix(in srgb, var(--cor-laranja) 40%, transparent);
+}
+.cta--master:hover {
+  box-shadow: 0 6px 44px color-mix(in srgb, var(--cor-laranja) 55%, transparent);
+}
+
+/* ==========================================================================
+   PLACEHOLDERS (Fases 1–4) — substituídos pelas fotos na Fase 5
+   Cada um ecoa a "practical light" da futura foto daquela dobra.
+   ========================================================================== */
+.placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.placeholder--d1 {
+  background: radial-gradient(60% 70% at 70% 40%,
+    color-mix(in srgb, var(--cor-ciano) 16%, transparent),
+    transparent 70%);
+}
+.placeholder--d2 {
+  background: radial-gradient(45% 55% at 50% 50%,
+    color-mix(in srgb, var(--cor-ciano) 22%, transparent),
+    color-mix(in srgb, var(--cor-azul-escuro) 10%, transparent) 75%);
+}
+.placeholder--d3 {
+  background: radial-gradient(55% 65% at 50% 45%,
+    color-mix(in srgb, var(--cor-mostarda) 15%, transparent),
+    transparent 72%);
+}
+.placeholder--d5 {
+  background: radial-gradient(60% 70% at 50% 55%,
+    color-mix(in srgb, var(--cor-azul-escuro) 65%, transparent),
+    transparent 78%);
+}
+.placeholder--d6 {
+  /* Composição travada (CLAUDE.md §2, decisão 7): o orbe vive na faixa
+     inferior, nunca no centro — é lá que o texto de fechamento mora agora.
+     `align-items: end` sobrescreve o `place-items: center` de `.placeholder`
+     só no eixo vertical; o padding-bottom dá a folga final antes da borda
+     (que a máscara em gradiente da .dobra__media já dissolve). */
+  align-items: end;
+  padding-bottom: clamp(2.5rem, 9vh, 6rem);
+  background: radial-gradient(55% 45% at 50% 78%,
+    color-mix(in srgb, var(--cor-laranja) 18%, transparent),
+    transparent 75%);
+}
+
+/* Par Juxtapose (D4): empilhados; o clip-path entra na Fase 3 */
+.placeholder--d4a,
+.placeholder--d4b { position: absolute; inset: 0; }
+.placeholder--d4a {
+  background: linear-gradient(160deg, var(--cinza-juxtapose-alto), var(--cinza-juxtapose-baixo));
+}
+.placeholder--d4b {
+  background: linear-gradient(160deg,
+    color-mix(in srgb, var(--cor-verde) 26%, var(--cinza-juxtapose-baixo)),
+    color-mix(in srgb, var(--cor-mostarda) 18%, var(--cinza-juxtapose-baixo)));
+  clip-path: inset(0 0 0 50%);   /* estado inicial estático da barra */
+}
+.placeholder__tag {
+  position: absolute;
+  top: 15%;                      /* abaixo da faixa de 12% que a máscara dissolve */
+  font-family: var(--fonte-display);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  color: var(--tinta-tag);
+}
+.placeholder--d4a .placeholder__tag { left: var(--espaco-3); }
+.placeholder--d4b .placeholder__tag { right: var(--espaco-3); }
+
+/* Núcleos flutuantes (assinatura visual — orbitam via GSAP na Fase 2) */
+.placeholder__nucleo {
+  position: absolute;
+  width: clamp(2.2rem, 5vw, 4rem);
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+.placeholder__nucleo--laranja {
+  top: 32%; right: 22%;
+  background: radial-gradient(circle at 35% 35%, var(--nucleo-brilho-laranja), var(--cor-laranja) 62%);
+  box-shadow: 0 0 40px 6px color-mix(in srgb, var(--cor-laranja) 45%, transparent);
+}
+.placeholder__nucleo--ciano {
+  top: 58%; right: 34%;
+  background: radial-gradient(circle at 35% 35%, var(--nucleo-brilho-ciano), var(--cor-ciano) 62%);
+  box-shadow: 0 0 34px 5px color-mix(in srgb, var(--cor-ciano) 40%, transparent);
+}
+.placeholder__nucleo--verde {
+  top: 24%; right: 40%;
+  background: radial-gradient(circle at 35% 35%, var(--nucleo-brilho-verde), var(--cor-verde) 62%);
+  box-shadow: 0 0 30px 4px color-mix(in srgb, var(--cor-verde) 38%, transparent);
+}
+.placeholder__nucleo--grande {
+  position: static;
+  width: clamp(3rem, 7vw, 5.5rem);
+  margin-bottom: var(--espaco-2);
+}
+
+/* ==========================================================================
+   RODAPÉ
+   ========================================================================== */
+.rodape {
+  padding: var(--espaco-4) clamp(1.25rem, 5vw, 4rem);
+  text-align: center;
+  color: var(--tinta-suave);
+  font-size: 0.88rem;
+}
+
+/* ==========================================================================
+   ACESSIBILIDADE — LEI do projeto
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  /* A rolagem das âncoras já vira salto instantâneo no JS (initAncorasSuaves).
+     O Arco de Luz sobrevive: é cor, não movimento (§6).
+     Juxtapose vira comparação estática lado a lado na Fase 3. */
+}
+
+/* ==========================================================================
+   MOBILE — menu acessível (antecipado da Fase 6)
+   ========================================================================== */
+@media (max-width: 640px) {
+  .header__toggle { display: inline-flex; }
+
+  /* A nav vira painel sob o header. Fechado = display:none, para sair também
+     da ordem de tabulação — o botão com aria-expanded é o substituto acessível. */
+  .header__nav {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: var(--espaco-1) clamp(1.25rem, 4vw, 3rem) var(--espaco-2);
+    background: color-mix(in srgb, var(--cor-branco-luminoso) 94%, transparent);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-top: 1px solid color-mix(in srgb, var(--tinta-forte) 10%, transparent);
+  }
+  [data-tema="escuro"] .header__nav {
+    background: color-mix(in srgb, var(--cor-deep-dark) 94%, transparent);
+  }
+
+  .header.menu-aberto .header__nav { display: flex; }
+
+  .header__nav a {
+    padding-block: 0.9rem;      /* alvo de toque confortável */
+    font-size: 1rem;
+    color: var(--tinta-forte);
+  }
+
+  .dobra { padding-bottom: var(--espaco-4); }
+}

@@ -1,0 +1,67 @@
+/* ==========================================================================
+   TOKENS — Instituto Núcleon-line
+   Fonte única de verdade visual. NENHUM hex fora deste arquivo.
+   As cores atuam como "practical lights": luzes de cena, uma dominante por dobra.
+   ========================================================================== */
+
+:root {
+  /* ---- Paleta narrativa ---- */
+  --cor-laranja:          #FF7A29; /* o núcleo — despertar, ação */
+  --cor-ciano:            #38DCE6; /* tecnologia, ecossistema */
+  --cor-verde:            #8FE07A; /* eficiência, o "Depois" B2B */
+  --cor-mostarda:         #E5B13F; /* prosperidade, conexões */
+  --cor-azul-escuro:      #0B1B33; /* institucional, B2G */
+  --cor-branco-luminoso:  #FAFBFC; /* universo do aluno (D1–D3) */
+  --cor-deep-dark:        #06080F; /* universo corporativo (D4–D6) */
+  --cor-arco-transicao:   #3A4150; /* meio-tom REAL do Arco de Luz (estágio 2 da passagem D3 → D4) */
+
+  /* Brilhos internos dos núcleos — o highlight do gradiente radial da assinatura visual */
+  --nucleo-brilho-laranja: #FFD3AE;
+  --nucleo-brilho-ciano:   #D8FBFD;
+  --nucleo-brilho-verde:   #E9FBE2;
+
+  /* Cinzas de cena do par Juxtapose (D4) — substituídos pelas fotos na Fase 5 */
+  --cinza-juxtapose-alto:  #232A35; /* topo do gradiente do "Antes" */
+  --cinza-juxtapose-baixo: #10141B; /* base comum aos dois lados */
+
+  /* Tinta de texto por tema (trocada via [data-tema]) */
+  --tinta-forte:  #0D1420;
+  --tinta-suave:  rgba(13, 20, 32, 0.68);
+
+  /* Tintas de contexto fixo (não invertem com o tema) */
+  --tinta-tag:            rgba(242, 245, 249, 0.4); /* labels sobre cena escura */
+  --tinta-sobre-laranja:  #1A0D02;                  /* texto sobre o CTA Master */
+
+  /* ---- Tipografia ---- */
+  --fonte-display: "Sora", system-ui, sans-serif;
+  --fonte-texto:   "Figtree", system-ui, sans-serif;
+
+  /* Escala fluida (mobile → desktop) */
+  --texto-eyebrow:  clamp(0.72rem, 0.65rem + 0.3vw, 0.85rem);
+  --texto-corpo:    clamp(1.02rem, 0.95rem + 0.35vw, 1.2rem);
+  --texto-titulo:   clamp(2rem, 1.4rem + 3vw, 3.6rem);
+  --texto-hero:     clamp(2.6rem, 1.6rem + 5vw, 5.4rem);
+
+  /* ---- Espaçamento e forma ---- */
+  --espaco-1: 0.5rem;
+  --espaco-2: 1rem;
+  --espaco-3: 1.75rem;
+  --espaco-4: 3rem;
+  --espaco-5: 5rem;
+  --raio-cta: 999px;      /* pílula — contenção "Apple" */
+  --largura-conteudo: 68rem;
+
+  /* ---- Movimento (grade de durações da §6 — não criar valores avulsos) ---- */
+  --transicao-micro:  0.3s cubic-bezier(0.33, 1, 0.68, 1);  /* microinterações */
+  --transicao-header: 0.45s cubic-bezier(0.33, 1, 0.68, 1); /* entrar/sair do Header Smart */
+  --transicao-tema:   0.6s ease;                            /* virada de tinta claro↔escuro */
+  --header-altura: 4.25rem;
+}
+
+/* Tema escuro: inverte a tinta.
+   Seletor genérico — vale para o <body> (definido pelo JS conforme a dobra ativa)
+   E para qualquer elemento que declare data-tema no HTML (seções, rodapé). */
+[data-tema="escuro"] {
+  --tinta-forte: #F2F5F9;
+  --tinta-suave: rgba(242, 245, 249, 0.66);
+}

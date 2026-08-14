@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Instituto Núcleon-line — Estude o que dá retorno real</title>
+  <meta name="description" content="Qualificação profissional com metodologia ágil. O mercado não espera. Ele seleciona." />
+
+  <!-- Tipografia oficial: Sora (display) + Figtree (texto) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body data-tema="claro">
+
+  <!-- Camada fixa do Arco de Luz: o fundo global que escurece com o scroll -->
+  <div class="arco-de-luz" aria-hidden="true"></div>
+
+  <!-- ============ HEADER SMART ============ -->
+  <header class="header" id="header">
+    <a class="header__marca" href="#dobra-1" aria-label="Instituto Núcleon-line — início">
+      <span class="nucleo-orbe" aria-hidden="true"></span>
+      <span class="header__nome">Núcleon<em>-line</em></span>
+    </a>
+    <nav class="header__nav" id="header-nav" aria-label="Navegação principal">
+      <a href="#dobra-3">Método</a>
+      <a href="#dobra-4">Empresas</a>
+      <a href="#dobra-5">Gestão Pública</a>
+    </nav>
+
+    <div class="header__acoes">
+      <a class="cta cta--compacto" href="#dobra-6">Inscreva-se</a>
+      <!-- Abaixo de 640px este botão é o substituto acessível da nav horizontal -->
+      <button class="header__toggle" type="button"
+              id="header-toggle"
+              aria-controls="header-nav"
+              aria-expanded="false"
+              aria-label="Menu de navegação">
+        <span class="header__toggle-barra" aria-hidden="true"></span>
+        <span class="header__toggle-barra" aria-hidden="true"></span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ============ DOBRA 1 · HERO — O DESPERTAR ============ -->
+    <section class="dobra dobra--hero" id="dobra-1" data-tema="claro">
+      <div class="dobra__media" data-parallax>
+        <!-- FASE 5: foto "jovem manipulando núcleos" (WebP, overscan 30%). Placeholder: -->
+        <div class="placeholder placeholder--d1" aria-hidden="true">
+          <span class="placeholder__nucleo placeholder__nucleo--laranja" data-orbita></span>
+          <span class="placeholder__nucleo placeholder__nucleo--ciano" data-orbita></span>
+          <span class="placeholder__nucleo placeholder__nucleo--verde" data-orbita></span>
+        </div>
+      </div>
+      <div class="dobra__conteudo">
+        <p class="eyebrow">Núcleo 01 — O Despertar</p>
+        <h1 class="titulo titulo--hero">O mercado não espera.<br />Ele seleciona.</h1>
+        <div class="dobra__acoes">
+          <a class="cta cta--primario" href="#dobra-6">Inicie Sua Trajetória</a>
+          <a class="cta cta--saiba-mais" href="pages/jovem.html" data-scrollback>Saiba Mais</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ DOBRA 2 · A PORTA DE ENTRADA (imersão pura — sem CTA por decisão de Direção de Arte) ============ -->
+    <section class="dobra dobra--imersao" id="dobra-2" data-tema="claro">
+      <div class="dobra__media" data-parallax>
+        <!-- FASE 5: close-up extremo do olho com o ecossistema refletido na pupila -->
+        <div class="placeholder placeholder--d2" aria-hidden="true"></div>
+      </div>
+      <div class="dobra__conteudo dobra__conteudo--minimo">
+        <p class="eyebrow eyebrow--sozinho">Núcleo 02 — O Ecossistema</p>
+      </div>
+    </section>
+
+    <!-- ============ DOBRA 3 · O DIFERENCIAL — VOCÊ É O HUB ============ -->
+    <section class="dobra" id="dobra-3" data-tema="claro">
+      <div class="dobra__media" data-parallax>
+        <!-- FASE 5: aluno estático ao centro, light trails orbitando -->
+        <div class="placeholder placeholder--d3" aria-hidden="true"></div>
+      </div>
+      <div class="dobra__conteudo">
+        <p class="eyebrow">Núcleo 03 — O Diferencial</p>
+        <h2 class="titulo">Você é o Hub.</h2>
+        <p class="paragrafo">Metodologia ágil que acelera a conexão com as oportunidades reais.</p>
+        <div class="dobra__acoes">
+          <a class="cta cta--primario" href="#dobra-6">Conecte-se ao Mercado</a>
+          <a class="cta cta--saiba-mais" href="pages/jovem.html" data-scrollback>Saiba Mais</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ DOBRA 4 · PITCH B2B — JUXTAPOSE (pin + scrub na Fase 3) ============ -->
+    <section class="dobra dobra--juxtapose" id="dobra-4" data-tema="escuro">
+      <div class="dobra__media">
+        <!-- FASE 3/5: par de imagens 4A (Antes) / 4B (Depois) com clip-path controlado pelo scroll -->
+        <div class="placeholder placeholder--d4a" aria-hidden="true"><span class="placeholder__tag">ANTES</span></div>
+        <div class="placeholder placeholder--d4b" aria-hidden="true"><span class="placeholder__tag">DEPOIS</span></div>
+      </div>
+      <div class="dobra__conteudo">
+        <p class="eyebrow">Núcleo 04 — Empresas</p>
+        <h2 class="titulo">Treinar custa.<br />Não treinar custa o dobro.</h2>
+        <p class="paragrafo">Transforme o custo do retrabalho no lucro da eficiência.</p>
+        <div class="dobra__acoes">
+          <a class="cta cta--primario" href="#dobra-6">Potencialize Sua Equipe</a>
+          <a class="cta cta--saiba-mais" href="pages/empresario.html" data-scrollback>Saiba Mais</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ DOBRA 5 · PITCH B2G — GESTÃO PÚBLICA ============ -->
+    <section class="dobra" id="dobra-5" data-tema="escuro">
+      <div class="dobra__media" data-parallax>
+        <!-- FASE 5: aperto de mãos cinematográfico, cidade próspera em bokeh -->
+        <div class="placeholder placeholder--d5" aria-hidden="true"></div>
+      </div>
+      <div class="dobra__conteudo">
+        <p class="eyebrow">Núcleo 05 — Gestão Pública</p>
+        <h2 class="titulo">Invista na qualificação.</h2>
+        <p class="paragrafo">Fortaleça sua gestão e construa um legado social.</p>
+        <div class="dobra__acoes">
+          <a class="cta cta--primario" href="#dobra-6">Transforme Sua Cidade</a>
+          <a class="cta cta--saiba-mais" href="pages/gestor-publico.html" data-scrollback>Saiba Mais</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ DOBRA 6 · FECHAMENTO — A 4ª PAREDE ============ -->
+    <section class="dobra dobra--final" id="dobra-6" data-tema="escuro">
+      <div class="dobra__media" data-parallax>
+        <!-- FASE 5: o mesmo jovem da D1, agora mentor, estendendo a mão com o núcleo laranja -->
+        <div class="placeholder placeholder--d6" aria-hidden="true">
+          <span class="placeholder__nucleo placeholder__nucleo--laranja placeholder__nucleo--grande"></span>
+        </div>
+      </div>
+      <div class="dobra__conteudo dobra__conteudo--central dobra__conteudo--superior">
+        <p class="eyebrow">Núcleo 06 — A Sua Vez</p>
+        <h2 class="titulo titulo--hero">Chegou a sua vez<br />de estar no centro.</h2>
+        <div class="dobra__acoes">
+          <a class="cta cta--master" href="#">Inscreva-se no Hub Agora</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="rodape" data-tema="escuro">
+    <p>© 2026 Instituto Núcleon-line · Estude o que dá retorno real.</p>
+  </footer>
+
+  <!-- GSAP + ScrollTrigger + ScrollToPlugin (CDN) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
