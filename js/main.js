@@ -1,9 +1,9 @@
 /* ==========================================================================
-   MAIN.JS — Instituto Núcleon-line · Fases 1–2 (Fundação + Esqueleto narrativo)
+   MAIN.JS — Instituto Núcleon-line · Fases 1–3
    Módulos: Movimento reduzido · Header Smart · Menu mobile · Arco de Luz
             · Tema por dobra · Parallax das fotos · Órbita da Dobra 1
-            · Âncoras suaves
-   Fases futuras adicionam: Juxtapose (F3), Scroll-Back (F4)
+            · Juxtapose da Dobra 4 · Âncoras suaves
+   Fases futuras adicionam: Scroll-Back (F4), Cross-Nav (F4)
    ========================================================================== */
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
@@ -13,10 +13,11 @@ gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
    O usuário pode ligar/desligar a preferência com o site aberto — por isso a
    consulta é observada, não lida uma vez só.
    Expõe o estado (movimentoReduzido()) e um canal de inscrição
-   (aoMudarMovimento()). O guard de fato nasce aqui na Fase 2: initParallax()
-   e initOrbitaD1() se inscrevem neste canal em vez de ler a media query de
-   novo — cada um destrói/recria seus próprios ScrollTriggers ao alternar.
-   O pin do Juxtapose (Fase 3) se inscreve do mesmo jeito quando chegar.
+   (aoMudarMovimento()). O guard de fato nasce na Fase 2: initParallax(),
+   initOrbitaD1() e (Fase 3) initJuxtaposeD4() se inscrevem neste canal em
+   vez de ler a media query de novo — cada um destrói/recria seus próprios
+   ScrollTriggers ao alternar. Com movimento reduzido, o Juxtapose nem chega
+   a criar o pin: fica no split 50/50 estático definido em CSS (§6).
    -------------------------------------------------------------------------- */
 const consultaMovimento = window.matchMedia("(prefers-reduced-motion: reduce)");
 let movimentoReduzidoAtivo = consultaMovimento.matches;
@@ -371,6 +372,96 @@ function initOrbitaD1() {
 }
 
 /* --------------------------------------------------------------------------
+   JUXTAPOSE DA DOBRA 4 (Fase 3)
+   A D4 "congela" (pin: true) por ~100vh de scroll adicional; nesse trecho o
+   scroll deixa de rolar a página e passa a ser o controle direto da barra
+   divisória — scrub: true, ease: "none", sem nenhuma animação automática.
+   Estado de repouso (CSS): .placeholder--d4b em clip-path: inset(0 0 0 50%)
+   e .juxtapose__divisoria centralizada na mesma linha — é o ponto de
+   partida ANTES do pin começar, e é o fallback completo sob movimento
+   reduzido (ver initJuxtaposeD4()). Do repouso, a timeline anima os dois
+   EXTREMOS reais: inset(0 0 0 100%) (Depois 100% escondido) até
+   inset(0 0 0 0%) (Depois 100% revelado) — não do meio para as pontas.
+   Divisória: mesma técnica de .dobra__foto e do parallax (Fase 2) —
+   xPercent:-50 replica a centralização estática do CSS, e só um `x` em
+   px anima por cima (nunca left — regra do §6). A barra varre a largura
+   inteira do container (.dobra__media), então seu alcance É a própria
+   largura medida em tempo real, não um número fixo — a mesma lógica de
+   "ler o layout renderizado, nunca duplicar" da órbita da D1.
+   Clip-path e divisória vivem na MESMA timeline, nas mesmas posições (0),
+   com a mesma duration — garante sincronia perfeita entre a revelação e o
+   "cursor" que a acompanha, sem dependerem de dois ScrollTriggers distintos
+   que pudessem divergir por arredondamento.
+   `anticipatePin: 1` evita o salto/flash comum ao entrar num pin (recomendação
+   oficial do GSAP) — é exatamente o defeito que a Fase 3 pediu para não ter.
+   `end` como função (não string fixa) recalcula ~100vh de verdade a cada
+   ScrollTrigger.refresh(); `invalidateOnRefresh` faz o mesmo para os valores
+   de `x` da divisória, que dependem da largura medida do container.
+   -------------------------------------------------------------------------- */
+let timelineJuxtaposeD4 = null;
+
+function construirJuxtaposeD4() {
+  const dobra4 = document.getElementById("dobra-4");
+  const media = dobra4 ? dobra4.querySelector(".dobra__media") : null;
+  const depois = dobra4 ? dobra4.querySelector(".placeholder--d4b") : null;
+  const divisoria = dobra4 ? dobra4.querySelector(".juxtapose__divisoria") : null;
+  if (!dobra4 || !media || !depois || !divisoria) return;
+
+  gsap.set(divisoria, { xPercent: -50 });
+
+  const timeline = gsap.timeline({
+    defaults: { ease: "none", duration: 1 },
+    scrollTrigger: {
+      trigger: dobra4,
+      start: "top top",
+      end: () => "+=" + window.innerHeight,
+      scrub: true,
+      pin: true,
+      anticipatePin: 1,
+      invalidateOnRefresh: true,
+    },
+  });
+
+  timeline
+    .fromTo(depois, { clipPath: "inset(0 0 0 100%)" }, { clipPath: "inset(0 0 0 0%)" }, 0)
+    .fromTo(
+      divisoria,
+      { x: () => media.offsetWidth / 2 },
+      { x: () => -(media.offsetWidth / 2) },
+      0
+    );
+
+  timelineJuxtaposeD4 = timeline;
+}
+
+function destruirJuxtaposeD4() {
+  // kill() na timeline também mata o ScrollTrigger (com pin) associado a
+  // ela — mesmo mecanismo do parallax, não precisa matar os dois à parte.
+  if (timelineJuxtaposeD4) {
+    timelineJuxtaposeD4.kill();
+    timelineJuxtaposeD4 = null;
+  }
+
+  // Estado exigido sob movimento reduzido: split 50/50 estático, sem pin,
+  // sem scrub — exatamente o clip-path/posição já declarados em CSS.
+  // clearProps (em vez de reescrever "50%" aqui) devolve o controle ao CSS
+  // sem duplicar um valor que já vive só na folha de estilos.
+  const depois = document.querySelector("#dobra-4 .placeholder--d4b");
+  const divisoria = document.querySelector("#dobra-4 .juxtapose__divisoria");
+  if (depois) gsap.set(depois, { clearProps: "clipPath" });
+  if (divisoria) gsap.set(divisoria, { clearProps: "transform" });
+}
+
+function initJuxtaposeD4() {
+  if (!movimentoReduzido()) construirJuxtaposeD4();
+
+  aoMudarMovimento((reduzido) => {
+    if (reduzido) destruirJuxtaposeD4();
+    else construirJuxtaposeD4();
+  });
+}
+
+/* --------------------------------------------------------------------------
    ÂNCORAS SUAVES
    Substitui o `scroll-behavior: smooth` global, que conflitava com o
    ScrollTrigger e atrapalharia o Scroll-Back da Fase 4.
@@ -423,6 +514,7 @@ initArcoDeLuz();
 initTemaPorDobra();
 initParallax();
 initOrbitaD1();
+initJuxtaposeD4();
 initAncorasSuaves();
 
 aoMudarMovimento((reduzido) => {

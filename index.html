@@ -94,10 +94,12 @@
       </div>
     </section>
 
-    <!-- ============ DOBRA 4 · PITCH B2B — JUXTAPOSE (pin + scrub na Fase 3) ============ -->
+    <!-- ============ DOBRA 4 · PITCH B2B — JUXTAPOSE (pin + scrub, Fase 3 — feito) ============ -->
     <section class="dobra dobra--juxtapose" id="dobra-4" data-tema="escuro">
       <div class="dobra__media">
-        <!-- FASE 3: o clip-path abaixo ainda é estático 50/50 — o arrastar via scroll é da Fase 3 -->
+        <!-- Estado de repouso: split 50/50 estático (ver css/style.css). O
+             pin + a revelação controlada pelo scroll são main.js → initJuxtaposeD4();
+             sob prefers-reduced-motion o JS não roda e este é o resultado final. -->
         <div class="placeholder placeholder--d4a" aria-hidden="true">
           <img class="dobra__foto" src="assets/img/d4a-antes.webp" alt="" loading="lazy" decoding="async" />
           <span class="placeholder__tag">ANTES</span>
@@ -106,6 +108,7 @@
           <img class="dobra__foto" src="assets/img/d4b-depois.webp" alt="" loading="lazy" decoding="async" />
           <span class="placeholder__tag">DEPOIS</span>
         </div>
+        <div class="juxtapose__divisoria" aria-hidden="true"></div>
       </div>
       <div class="dobra__scrim" aria-hidden="true"></div>
       <div class="dobra__conteudo">
