@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hub IA — Instituto Núcleon-line</title>
+  <meta name="description" content="Converse com a Núcleon IA sobre cursos, metodologia ágil e conexão com empresas parceiras." />
+
+  <!-- Tipografia oficial: Sora (display) + Figtree (texto) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="../css/tokens.css" />
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<!-- Tema fixo `escuro`: página de app de tela única, sem scrollytelling —
+     não carrega o Arco de Luz. Continua visualmente de onde a Dobra 6 termina,
+     reaproveitando --cor-deep-dark e a mesma lógica [data-tema] de tinta. -->
+<body data-tema="escuro">
+
+  <header class="header hub-topo">
+    <a class="header__marca" href="../index.html" aria-label="Instituto Núcleon-line — início">
+      <img class="header__logo header__logo--clara" src="../assets/svg/logo-nucleon-claro.svg" alt="Instituto Núcleon-line" width="658" height="154" />
+      <img class="header__logo header__logo--escura" src="../assets/svg/logo-nucleon-escuro.svg" alt="Instituto Núcleon-line" width="658" height="154" />
+    </a>
+  </header>
+
+  <main class="hub">
+    <section class="chat" aria-label="Conversa com a assistente Núcleon IA">
+      <div class="chat__cabecalho">
+        <span class="nucleo-orbe chat__avatar" aria-hidden="true"></span>
+        <div class="chat__identidade">
+          <p class="chat__nome">Núcleon IA</p>
+          <p class="chat__status"><span class="chat__status-ponto" aria-hidden="true"></span>Online</p>
+        </div>
+      </div>
+
+      <div class="chat__historico" id="chat-historico" role="log" aria-live="polite" aria-label="Histórico de mensagens"></div>
+
+      <form class="chat__form" id="chat-form">
+        <label class="sr-only" for="chat-input">Escreva sua pergunta</label>
+        <input class="chat__input" id="chat-input" type="text" placeholder="Pergunte sobre cursos, metodologia ou conexão com empresas…" autocomplete="off" />
+        <button class="chat__enviar" type="submit" aria-label="Enviar mensagem">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="12" y1="19" x2="12" y2="5"></line>
+            <polyline points="6 11 12 5 18 11"></polyline>
+          </svg>
+        </button>
+      </form>
+    </section>
+  </main>
+
+  <script src="../js/hub-ia.js"></script>
+</body>
+</html>

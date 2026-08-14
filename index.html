@@ -22,8 +22,10 @@
   <!-- ============ HEADER SMART ============ -->
   <header class="header" id="header">
     <a class="header__marca" href="#dobra-1" aria-label="Instituto Núcleon-line — início">
-      <span class="nucleo-orbe" aria-hidden="true"></span>
-      <span class="header__nome">Núcleon<em>-line</em></span>
+      <!-- As duas versões vivem juntas no DOM; o CSS escolhe qual mostrar via
+           [data-tema], sem troca de src via JS — evita flash na transição. -->
+      <img class="header__logo header__logo--clara" src="assets/svg/logo-nucleon-claro.svg" alt="Instituto Núcleon-line" width="658" height="154" />
+      <img class="header__logo header__logo--escura" src="assets/svg/logo-nucleon-escuro.svg" alt="Instituto Núcleon-line" width="658" height="154" />
     </a>
     <nav class="header__nav" id="header-nav" aria-label="Navegação principal">
       <a href="#dobra-3">Método</a>
@@ -144,6 +146,7 @@
         <div class="dobra__acoes">
           <a class="cta cta--master" href="#">Inscreva-se no Hub Agora</a>
         </div>
+        <a class="link-hub" href="pages/hub-ia.html">Conheça o Hub</a>
       </div>
     </section>
 
