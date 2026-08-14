@@ -716,6 +716,11 @@ body[data-tema="escuro"] { background: var(--cor-deep-dark); }
 
 .cartao-inscricao {
   width: min(100%, 560px);
+  /* min-width:0 anula o floor padrão de item de grid (.cartao-inscricao é
+     item de .inscricao, que é display:grid): sem isso, um descendente sem
+     largura própria — historicamente o <select> — pode forçar este cartão
+     a ultrapassar os 560px/100% especificados em telas estreitas. */
+  min-width: 0;
   padding: clamp(1.75rem, 4vw, 3rem);
   background: color-mix(in srgb, var(--cinza-juxtapose-alto) 55%, var(--cor-deep-dark));
   border: 1px solid color-mix(in srgb, var(--tinta-forte) 10%, transparent);
@@ -743,9 +748,10 @@ body[data-tema="escuro"] { background: var(--cor-deep-dark); }
   display: grid;
   gap: var(--espaco-3);
   margin-top: var(--espaco-3);
+  min-width: 0; /* mesma razão do .cartao-inscricao — item de grid de .inscricao-etapa--form */
 }
 
-.campo { display: grid; gap: 0.5rem; }
+.campo { display: grid; gap: 0.5rem; min-width: 0; } /* idem — item de grid de .inscricao-form */
 .campo label {
   font-family: var(--fonte-texto);
   font-size: 0.85rem;
@@ -754,6 +760,14 @@ body[data-tema="escuro"] { background: var(--cor-deep-dark); }
 }
 .campo input,
 .campo select {
+  /* width:100% + min-width:0 é a correção de raiz do estouro horizontal:
+     sem largura própria, o <select> assume seu tamanho preferido nativo —
+     que em telas estreitas, com uma opção longa como "Gestão Pública —
+     quero investir na minha cidade" e appearance:none removendo o
+     truncamento nativo do navegador, vira um min-content maior que a
+     viewport e força todo o cartão a estourar. */
+  width: 100%;
+  min-width: 0;
   border: 1px solid color-mix(in srgb, var(--tinta-forte) 16%, transparent);
   border-radius: var(--raio-cta);
   padding: 0.8rem 1.2rem;
@@ -774,6 +788,11 @@ body[data-tema="escuro"] { background: var(--cor-deep-dark); }
    dois gradientes formando um "v", cor do token de tinta suave. */
 .campo select {
   appearance: none;
+  /* Trunca com reticências em vez de deixar o texto da opção selecionada
+     empurrar a caixa para além da largura definida acima. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   background-image:
     linear-gradient(45deg, transparent 50%, var(--tinta-suave) 50%),
     linear-gradient(135deg, var(--tinta-suave) 50%, transparent 50%);
