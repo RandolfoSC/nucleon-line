@@ -181,6 +181,41 @@ body[data-tema="escuro"] { background: var(--cor-deep-dark); }
           mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);
 }
 
+/* SCRIM — correção de contraste sobre foto real (D3, D4, D5, D6; D1/D2 não
+   precisam: D1 tem CTAs com fundo opaco e eyebrow curto, D2 não tem texto).
+   Um IRMÃO de .dobra__media e .dobra__conteudo — não um filho de nenhum dos
+   dois. Usa o MESMO mecanismo de z-index:-1 que já garante que .dobra__media
+   fica atrás de .dobra__conteudo (elemento não-posicionado sempre pinta
+   acima de z-index negativo, independente da ordem no DOM); entre dois
+   elementos com z-index:-1, quem vem depois no DOM pinta por cima — por
+   isso o scrim entra DEPOIS de .dobra__media no HTML. Ficar fora de
+   .dobra__media é deliberado: quando a Fase 2 mover a foto via parallax, o
+   scrim tem que continuar parado, alinhado ao texto (que também não se
+   move) — não pode viajar junto com a imagem.
+   Cobre uma faixa vertical generosa (12%–76%, com rampa até 92%) calibrada
+   pela posição real do bloco de texto nas 4 dobras — inclui a D6, que é
+   ancorada mais ao topo (decisão 7) e por isso a única que precisa da
+   correção começar tão cedo. Fora dessa faixa a foto fica limpa: não é um
+   véu por cima da imagem inteira. */
+.dobra__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(to bottom,
+    transparent 0%,
+    color-mix(in srgb, var(--cor-branco-luminoso) 80%, transparent) 12%,
+    color-mix(in srgb, var(--cor-branco-luminoso) 80%, transparent) 76%,
+    transparent 92%);
+}
+[data-tema="escuro"] .dobra__scrim {
+  background: linear-gradient(to bottom,
+    transparent 0%,
+    color-mix(in srgb, var(--cor-deep-dark) 82%, transparent) 12%,
+    color-mix(in srgb, var(--cor-deep-dark) 82%, transparent) 76%,
+    transparent 92%);
+}
+
 .dobra__conteudo {
   max-width: var(--largura-conteudo);
   margin-inline: auto;
@@ -347,8 +382,14 @@ body[data-tema="escuro"] { background: var(--cor-deep-dark); }
 .link-hub--voltar:hover::before { transform: translateX(-4px); }
 
 /* ==========================================================================
-   PLACEHOLDERS (Fases 1–4) — substituídos pelas fotos na Fase 5
-   Cada um ecoa a "practical light" da futura foto daquela dobra.
+   FOTOS DAS DOBRAS (Fase 5 parcial — Home) + placeholders remanescentes
+   D1, D2, D3, D5, D6 e o par D4A/D4B já usam a foto real. Os wrappers
+   .placeholder--d6/d4a/d4b sobrevivem porque ainda carregam regras de
+   layout de verdade (composição travada da D6, clip-path do Juxtapose) —
+   os demais (d1/d2/d3/d5), que só existiam para pintar o gradiente de cor,
+   foram removidos do HTML junto com o gradiente que substituíam.
+   As internas (Jovem, Empresário, Gestor Público) continuam sem foto: são
+   páginas da Fase 4, ainda não construídas.
    ========================================================================== */
 .placeholder {
   position: absolute;
@@ -357,49 +398,41 @@ body[data-tema="escuro"] { background: var(--cor-deep-dark); }
   place-items: center;
 }
 
-.placeholder--d1 {
-  background: radial-gradient(60% 70% at 70% 40%,
-    color-mix(in srgb, var(--cor-ciano) 16%, transparent),
-    transparent 70%);
+/* A foto real de cada dobra. Mais alta que o container (130%) e centralizada
+   por transform: a folga vertical é o overscan que a Fase 2 vai usar para
+   mover a imagem dentro do container (overflow:hidden em .dobra) sem nunca
+   revelar borda — decisão 5 do CLAUDE.md. object-fit:cover faz o corte;
+   a margem de segurança que garante que esse corte nunca alcança o sujeito
+   já vem da própria composição da foto (ver PROMPTS_FREEPIK.md, regras 1 e 2). */
+.dobra__foto {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 130%;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
 }
-.placeholder--d2 {
-  background: radial-gradient(45% 55% at 50% 50%,
-    color-mix(in srgb, var(--cor-ciano) 22%, transparent),
-    color-mix(in srgb, var(--cor-azul-escuro) 10%, transparent) 75%);
-}
-.placeholder--d3 {
-  background: radial-gradient(55% 65% at 50% 45%,
-    color-mix(in srgb, var(--cor-mostarda) 15%, transparent),
-    transparent 72%);
-}
-.placeholder--d5 {
-  background: radial-gradient(60% 70% at 50% 55%,
-    color-mix(in srgb, var(--cor-azul-escuro) 65%, transparent),
-    transparent 78%);
-}
+
 .placeholder--d6 {
   /* Composição travada (CLAUDE.md §2, decisão 7): o orbe vive na faixa
      inferior, nunca no centro — é lá que o texto de fechamento mora agora.
      `align-items: end` sobrescreve o `place-items: center` de `.placeholder`
      só no eixo vertical; o padding-bottom dá a folga final antes da borda
-     (que a máscara em gradiente da .dobra__media já dissolve). */
+     (que a máscara em gradiente da .dobra__media já dissolve). A foto
+     (.dobra__foto) é absolutamente posicionada e ignora esse align-items;
+     só o núcleo (position:static) responde a ele — é assim que os dois
+     continuam coexistindo na mesma caixa sem disputar o mesmo lugar. */
   align-items: end;
   padding-bottom: clamp(2.5rem, 9vh, 6rem);
-  background: radial-gradient(55% 45% at 50% 78%,
-    color-mix(in srgb, var(--cor-laranja) 18%, transparent),
-    transparent 75%);
 }
 
-/* Par Juxtapose (D4): empilhados; o clip-path entra na Fase 3 */
+/* Par Juxtapose (D4): empilhados; o arrastar via scroll entra na Fase 3.
+   A divisória de hoje é só o clip-path estático abaixo — não mexer nisso
+   ainda. Ele recorta o wrapper inteiro, foto incluída. */
 .placeholder--d4a,
 .placeholder--d4b { position: absolute; inset: 0; }
-.placeholder--d4a {
-  background: linear-gradient(160deg, var(--cinza-juxtapose-alto), var(--cinza-juxtapose-baixo));
-}
 .placeholder--d4b {
-  background: linear-gradient(160deg,
-    color-mix(in srgb, var(--cor-verde) 26%, var(--cinza-juxtapose-baixo)),
-    color-mix(in srgb, var(--cor-mostarda) 18%, var(--cinza-juxtapose-baixo)));
   clip-path: inset(0 0 0 50%);   /* estado inicial estático da barra */
 }
 .placeholder__tag {
