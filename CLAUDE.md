@@ -83,6 +83,9 @@ Copy das páginas internas (Jovem, Empresário B2B, Gestor Público B2G): está 
 - **Header Smart (Fase 1 — feito):** minimalista, esconde no scroll para baixo, reaparece no scroll para cima. Ganha leve blur/fundo quando fora do topo. Adapta cor ao tema claro/escuro da dobra atual.
 - **Menu mobile (antecipado da Fase 6 — feito):** abaixo de 640px a nav horizontal vira painel sob o header, comandado por um botão com `aria-expanded`/`aria-controls`. Fechado, o painel sai da ordem de tabulação; abrir move o foco para o primeiro link; `Esc` fecha e devolve o foco ao botão. Com o menu aberto o header não se esconde. **Links de navegação nunca podem simplesmente sumir num breakpoint.**
 - **Âncoras suaves (Fase 1 — feito):** não existe `scroll-behavior: smooth` global (conflita com o ScrollTrigger e com o Scroll-Back da Fase 4). A rolagem é feita no `initAncorasSuaves()` via GSAP ScrollToPlugin, descontando a altura do header, com salto instantâneo sob `prefers-reduced-motion`.
+- **Parallax das fotos (Fase 2 — feito):** `.dobra__foto` desloca-se dentro do seu container (`.dobra__media[data-parallax]`) via `transform`, nunca `top/left` — ±16% da altura do container (§6, valor recalibrado e auditado contra o teto físico do overscan), dentro da folga do overscan de 30% (decisão 5). A centralização original do CSS (`top/left:50%` + `translate(-50%,-50%)`) é replicada em GSAP via `xPercent`/`yPercent`, e só o `y` extra do parallax anima por cima, com `scrub` cobrindo o trajeto inteiro da dobra na viewport. **A D4 fica de fora** — o par Antes/Depois do Juxtapose permanece estático até o `pin` da Fase 3; não tem `data-parallax` no HTML.
+- **Órbita da Dobra 1 (Fase 2 — feito):** os três núcleos (`.placeholder__nucleo[data-orbita]`) orbitam sua própria posição de repouso (definida em CSS) num círculo achatado, com 120° de defasagem entre eles. Diferente da órbita em `@keyframes` de `pages/em-breve.html` (que gira no tempo), esta é dirigida pelo progresso do `ScrollTrigger` da própria D1 — reverter o scroll reverte o movimento pelo mesmo caminho. O raio é lido do próprio elemento renderizado (`offsetWidth`), nunca duplicado como número fixo.
+- **Guard de `prefers-reduced-motion` (Fase 2 — feito):** o parallax e a órbita da D1 são os primeiros consumidores reais do canal `aoMudarMovimento()` preparado na Fase 1 (§6). Cada um expõe um par `construir*()`/`destruir*()`: com movimento reduzido ativo (na carga ou ligado em tempo real), os `ScrollTrigger`s são destruídos e foto/núcleos voltam à pose estática do CSS — sem inércia, sem resíduo de transform.
 - **Juxtapose D4 (Fase 3):** seção com `pin` do ScrollTrigger; o scroll desliza a barra divisória revelando o "Depois" (técnica: `clip-path: inset()` animado com `scrub`). É a engenharia mais delicada do projeto — fase exclusiva.
 - **Scroll-Back Cirúrgico (Fase 4):** ao clicar em "Saiba Mais", gravar `window.scrollY` em `sessionStorage` (`nucleon:scrollPos`). Ao voltar da interna, restaurar com scroll suave até a posição exata.
 - **Cross-Nav (Fase 4):** rodapé "Explore Mais Núcleos" nas internas. Mostra SEMPRE os 2 outros públicos; os já visitados (rastreados em `sessionStorage` → `nucleon:visitados`) ganham badge sutil "visitado" — nunca somem.
@@ -93,9 +96,10 @@ Copy das páginas internas (Jovem, Empresário B2B, Gestor Público B2G): está 
 
 - Easing padrão: `power2.out` (entradas) e `none` para tudo com `scrub` (o scroll É o easing).
 - Durações: micro 0.3s · entradas 0.8–1.0s · nada acima de 1.2s.
-- Parallax: deslocamento máximo de ±12% da altura do container (o overscan de 30% dá margem de sobra).
+- Parallax: deslocamento máximo de **±16% da altura do container** (`ALCANCE_PARALLAX` em `main.js`).
+  **Teto físico, não estético:** o overscan de 30% (decisão 5) dá exatamente 15% de folga de cada lado — esse é o limite matemático absoluto em que a foto ainda cobre 100% do container; acima dele não é "foto fraca", é vazio real revelando o fundo do Arco de Luz por trás. Auditoria feita ao subir o valor de ±12%: ±15% zera a folga por completo (sem margem para variação de subpixel/zoom/navegador — medido 14.99%–15.02% nas 5 dobras com parallax × 3 breakpoints, desktop/375px/390px); ±18% foi testado e **rejeitado** por criar um vazio de ~3% da altura do container em cada extremo — 25% da faixa de 12% que a máscara em gradiente (§8.1) dissolve, ou seja, um quarto dessa faixa vira ausência total de pixel em vez de fade suave. ±16% ficou escolhido por sobrar ~1% de vazio (8% da faixa da máscara), dentro da região onde ela já está entre 0–8% de opacidade — non-zero, mas imperceptível na prática. **Não subir este valor sem repetir a auditoria** (medir slack real vs. zona da máscara nos 3 breakpoints).
 - **`prefers-reduced-motion: reduce` é LEI:** com ele ativo, matar parallax, orbitas e o pin do Juxtapose (mostrar "Antes/Depois" lado a lado estático). O arco de luz pode permanecer (é mudança de cor, não movimento).
-  **Estado real do guard:** em `main.js` ele está **PREPARADO, não implementado** — existe a consulta observada (`matchMedia` + listener de `change`), o acessor `movimentoReduzido()` e o canal de inscrição `aoMudarMovimento(cb)`. Hoje só a rolagem das âncoras o consome, porque é a única coisa que se move. **O guard de fato nasce na Fase 2** (parallax/órbitas) e na Fase 3 (pin), que devem se inscrever nesse canal em vez de ler a media query de novo.
+  **Estado real do guard:** a consulta observada (`matchMedia` + listener de `change`), o acessor `movimentoReduzido()` e o canal de inscrição `aoMudarMovimento(cb)` são preparo da Fase 1. **O guard nasceu de fato na Fase 2:** `initParallax()` e `initOrbitaD1()` se inscrevem em `aoMudarMovimento()` e cada um mantém seu próprio par `construir*()`/`destruir*()` — matar os `ScrollTrigger`s e devolver foto/núcleos à pose estática do CSS quando reduzido, recriá-los quando não. As âncoras suaves continuam consumindo o canal do mesmo jeito. O pin do Juxtapose (Fase 3) se inscreve com o mesmo padrão quando chegar.
 - Nunca animar `top/left/width` — apenas `transform` e `opacity` (e `clip-path` no Juxtapose).
 - Durações vêm de tokens, não de números avulsos: `--transicao-micro` (0,3s), `--transicao-header` (0,45s), `--transicao-tema` (0,6s).
 
@@ -106,7 +110,7 @@ Copy das páginas internas (Jovem, Empresário B2B, Gestor Público B2G): está 
 | Fase | Escopo | Status |
 |---|---|---|
 | 1 | Fundação: estrutura, tokens, tipografia, grid das dobras, Header Smart, arco de luz | ✅ entregue |
-| 2 | Esqueleto narrativo: parallax base nas 6 dobras, órbitas da D1, ritmo do scroll com placeholders | ⏳ próxima |
+| 2 | Esqueleto narrativo: parallax base nas 6 dobras, órbitas da D1, ritmo do scroll com placeholders | ✅ entregue |
 | 3 | Juxtapose da Dobra 4 (pin + clip-path com scrub) | — |
 | 4 | Páginas internas (3), Scroll-Back, Cross-Nav | — |
 | 5 | Integração das fotos reais + fusão cromática CSS↔imagem | — |
@@ -141,6 +145,21 @@ Toda mídia de dobra vive dentro de `.dobra__media`, que carrega **obrigatoriame
 4. **Vale também para as internas** (Fase 4) e para o par do Juxtapose (Fase 3) — o `clip-path` da barra divisória compõe com a máscara sem conflito, porque atua nos filhos.
 
 Elementos de UI **nunca** entram na `.dobra__media` — só mídia. Texto, CTA e eyebrow vivem na `.dobra__conteudo`, que não é mascarada.
+
+### 8.2 SCRIM DA D4 — exceção auditada (65%, não 82%)
+
+O `.dobra__scrim` genérico (`[data-tema="escuro"]`, `--cor-deep-dark` a 82%) serve D5 e D6 sem ajuste. A **D4 é exceção**, escopada por `#dobra-4 .dobra__scrim` — investigação de ago/2026, motivada por suspeita de que o scrim estivesse achatando a diferença tonal entre "Antes" e "Depois" (o par Juxtapose).
+
+**Medição (canvas, luminância WCAG relativa, pixel a pixel, na região real coberta pelo texto — eyebrow/título/parágrafo — replicando o recorte `object-fit: cover` + overscan de 130% da foto real):**
+
+1. **Sem scrim, o texto falha:** pior caso de contraste (pixel mais claro sob o texto, tipicamente o halo da luminária acesa em "Depois" ou o brilho do notebook) cai para **1,08–1,33:1** — muito abaixo do mínimo de 4,5:1. **O scrim não é decoração, é necessidade de leitura**: sem ele, o texto seria ilegível em cima das fotos reais.
+2. **Achatamento confirmado:** a 82%, a diferença de luminância média entre A e B na região do texto cai entre 38% e 55% (varia por breakpoint — ex.: de 43,8% "bruto" para 27% em 1280×800). O halo quente da luminária, que é o principal sinal visual de "Depois", fica visualmente abafado.
+3. **Piso de leitura, medido em 5 tamanhos de tela** (375px, 390px, 1280×800, 1366×768, 1920×1080 — a proporção da tela muda QUAL parte da foto o `object-fit: cover` revela sob o texto, então o piso varia por breakpoint, não é constante): pior caso ≈ **57,5–58%**, nos dois breakpoints de laptop mais comuns (1280×800 e 1366×768) — não é uma relação simples de "tela mais larga = mais exigente": 1920×1080 testou mais folgado (~53%) que os dois anteriores, porque muda o eixo que o `cover` corta (largura vs. altura).
+4. **65% escolhido:** folga real acima do piso medido (pior caso ≥5,9:1 nos breakpoints mais exigentes — ~30% de margem sobre os 4,5:1 mínimos) e recupera parte da diferenciação tonal (35,6% de diferença preservada em 1280×800, contra 27% em 82%). Não é o mínimo absoluto (~58%) — a folga é deliberada, dado que a medição amostra alguns tamanhos de tela reais, não todos os possíveis.
+
+**Resultado:** a diferença entre "Antes" e "Depois" ficou mais perceptível, mas **ainda é modesta mesmo sem nenhum scrim** — as duas fotos são, por composição, cenas "deep dark studio" (decisão travada), então o diferencial real está concentrado na luz da luminária (localizada), não num clareamento geral do quadro. Se a Direção Criativa quiser uma diferença tonal mais dramática entre A e B, isso é decisão de **regerar as fotos** com mais contraste de cor/luz entre si — fora do escopo desta auditoria, que tratou só do CSS.
+
+**Se a janela do scrim mudar** (a faixa 12%–76%/rampa até 92%, ou a posição do texto na D4), refaça esta auditoria — o piso de 65% foi calibrado para a composição atual, não é uma constante universal.
 
 ## 9. CONVENÇÕES DE CÓDIGO
 
