@@ -815,3 +815,113 @@ button.cta {
   justify-content: center;
   margin-top: var(--espaco-1);
 }
+
+/* ==========================================================================
+   EM BREVE — pages/em-breve.html
+   Teaser para as 3 páginas internas da Fase 4 (ainda não construídas) e
+   para a interna da Dobra 1. Página 100% estática — nenhum JS, nenhum GSAP.
+   A órbita é a única animação: CSS puro (@keyframes), independente da Fase 2,
+   e desligada por completo sob prefers-reduced-motion (regra global no topo
+   deste arquivo já zera durações, mas aqui também fixamos uma posição de
+   repouso deliberada — três pontos parados, não um frame congelado ao acaso).
+   ========================================================================== */
+
+.em-breve {
+  min-height: calc(100dvh - var(--header-altura));
+  display: grid;
+  place-items: center;
+  padding: clamp(1rem, 4vw, 2.5rem);
+}
+
+.em-breve__conteudo {
+  display: grid;
+  justify-items: center;
+  gap: var(--espaco-3);
+  text-align: center;
+  max-width: 34rem;
+}
+.em-breve__conteudo .titulo {
+  max-width: 30ch; /* título mais longo que o das dobras — precisa de mais fôlego que os 18ch padrão */
+}
+
+/* ---- Órbita: três núcleos girando em círculo ao redor de um ponto central.
+   Técnica de "pivô + contragiro": cada núcleo mora dentro de um .orbita__pivo
+   que gira 360°; o núcleo em si gira na direção oposta na mesma velocidade,
+   cancelando o próprio giro (o brilho off-center do gradiente não "roda"),
+   só a translação ao longo do raio permanece — o núcleo varre o círculo sem
+   girar sobre si mesmo. Os três ficam 120° defasados via animation-delay
+   negativo, então uma única @keyframes basta para os três. ---- */
+.orbita {
+  --orbita-raio: clamp(3.75rem, 11vw, 5.5rem);
+  position: relative;
+  width: calc(var(--orbita-raio) * 2 + 3rem);
+  height: calc(var(--orbita-raio) * 2 + 3rem);
+}
+
+.orbita__centro {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0.4rem;
+  height: 0.4rem;
+  margin: -0.2rem;
+  border-radius: 50%;
+  background: var(--tinta-suave);
+}
+
+.orbita__pivo {
+  position: absolute;
+  inset: 0;
+  animation: orbita-girar 18s linear infinite;
+}
+.orbita__pivo--ciano { animation-delay: -6s; }  /* 18s / 3 — defasagem de 120° */
+.orbita__pivo--verde { animation-delay: -12s; } /* 18s / 3 * 2 — defasagem de 240° */
+
+.orbita__nucleo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: clamp(1.8rem, 4.5vw, 2.6rem);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  animation: orbita-contragirar 18s linear infinite;
+}
+.orbita__nucleo--laranja {
+  background: radial-gradient(circle at 35% 35%, var(--nucleo-brilho-laranja), var(--cor-laranja) 62%);
+  box-shadow: 0 0 28px 4px color-mix(in srgb, var(--cor-laranja) 45%, transparent);
+}
+.orbita__nucleo--ciano {
+  background: radial-gradient(circle at 35% 35%, var(--nucleo-brilho-ciano), var(--cor-ciano) 62%);
+  box-shadow: 0 0 24px 4px color-mix(in srgb, var(--cor-ciano) 40%, transparent);
+  animation-delay: -6s;
+}
+.orbita__nucleo--verde {
+  background: radial-gradient(circle at 35% 35%, var(--nucleo-brilho-verde), var(--cor-verde) 62%);
+  box-shadow: 0 0 22px 3px color-mix(in srgb, var(--cor-verde) 38%, transparent);
+  animation-delay: -12s;
+}
+
+@keyframes orbita-girar {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes orbita-contragirar {
+  from { transform: translate(-50%, -50%) translateX(var(--orbita-raio)) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) translateX(var(--orbita-raio)) rotate(-360deg); }
+}
+
+/* prefers-reduced-motion é LEI (CLAUDE.md §6): os três núcleos param,
+   espaçados 120° um do outro ao redor do centro — uma posição de repouso
+   desenhada, não o acaso de onde a animação seria congelada. */
+@media (prefers-reduced-motion: reduce) {
+  .orbita__pivo,
+  .orbita__nucleo {
+    animation: none;
+  }
+  .orbita__pivo--laranja { transform: rotate(0deg); }
+  .orbita__pivo--ciano   { transform: rotate(120deg); }
+  .orbita__pivo--verde   { transform: rotate(240deg); }
+  .orbita__nucleo {
+    transform: translate(-50%, -50%) translateX(var(--orbita-raio));
+  }
+}

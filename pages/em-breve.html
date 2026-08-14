@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Em Breve — Instituto Núcleon-line</title>
+  <meta name="description" content="Esta rota ainda está sendo construída. Volte em breve." />
+
+  <!-- Tipografia oficial: Sora (display) + Figtree (texto) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="../css/tokens.css" />
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<!-- Tema fixo `escuro`, sem Arco de Luz — mesmo padrão do Hub IA e da
+     Inscrição. Página 100% estática: nenhum JS, nenhum GSAP. A única
+     animação (a órbita) é CSS puro (@keyframes), independente da Fase 2. -->
+<body data-tema="escuro">
+
+  <header class="header hub-topo">
+    <a class="header__marca" href="../index.html" aria-label="Instituto Núcleon-line — início">
+      <img class="header__logo header__logo--clara" src="../assets/svg/logo-nucleon-claro.svg" alt="Instituto Núcleon-line" width="658" height="154" />
+      <img class="header__logo header__logo--escura" src="../assets/svg/logo-nucleon-escuro.svg" alt="Instituto Núcleon-line" width="658" height="154" />
+    </a>
+  </header>
+
+  <main class="em-breve">
+    <div class="em-breve__conteudo">
+
+      <div class="orbita" aria-hidden="true">
+        <span class="orbita__centro"></span>
+        <div class="orbita__pivo orbita__pivo--laranja">
+          <span class="orbita__nucleo orbita__nucleo--laranja"></span>
+        </div>
+        <div class="orbita__pivo orbita__pivo--ciano">
+          <span class="orbita__nucleo orbita__nucleo--ciano"></span>
+        </div>
+        <div class="orbita__pivo orbita__pivo--verde">
+          <span class="orbita__nucleo orbita__nucleo--verde"></span>
+        </div>
+      </div>
+
+      <h1 class="titulo">O mercado está mudando.<br />Em breve, você estará no centro da mudança.</h1>
+      <p class="paragrafo">Estamos construindo esta rota. Volte em breve.</p>
+
+      <a class="link-hub link-hub--voltar" href="../index.html">Voltar à Home</a>
+    </div>
+  </main>
+
+</body>
+</html>
