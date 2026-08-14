@@ -226,14 +226,30 @@ function initTemaPorDobra() {
    num único transform — para o deslocamento do parallax (um `y` em px)
    entrar por cima sem brigar com a base. A própria height:130% do CSS não
    é tocada, só o transform anima dentro dela, como pedido.
-   Alcance: ±12% da altura do CONTAINER, não da foto (regra do §6). Os 15%
-   de folga de cada lado do overscan de 30% cobrem esse curso com margem.
+   Alcance: ±16% da altura do CONTAINER, não da foto (regra do §6, valor
+   recalibrado — auditoria abaixo). Teto físico ABSOLUTO: ±15%, ponto exato
+   em que a folga de 15% de cada lado do overscan de 30% (decisão 5) se
+   esgota — medido empiricamente em todas as dobras com parallax e nos 3
+   breakpoints de referência (14.99%-15.02%, a variação é ruído de
+   subpixel/scrollbar, não erro de fórmula). Além de ±15% não sobra foto:
+   é vazio real revelando o fundo do Arco de Luz, não "foto fraca" pela
+   máscara. ±18% foi testado e REJEITADO: cria um vazio de ~3% da altura do
+   container em cada extremo — 25% da zona de 12% que a máscara em
+   gradiente (§8.1) dissolve, ou seja, o primeiro quarto dessa faixa vira
+   ausência total de pixel em vez de um fade. ±16% tem folga real (~1% de
+   vazio, 8% da zona da máscara) bem dentro da faixa onde a máscara já está
+   entre 0-8% de opacidade — imperceptível na prática, mas non-zero, ao
+   contrário de ±15%, que não deixa margem alguma para variação de
+   navegador/zoom. Não subir este valor sem repetir esta auditoria.
    `end`/`start` cobrem o trajeto inteiro da dobra na viewport (de "começa a
    entrar por baixo" a "termina de sair por cima") para o movimento ficar
    perceptível sem ser abrupto. `invalidateOnRefresh` recalcula o alcance
    (função, não valor fixo) sempre que ScrollTrigger.refresh() rodar —
    inclusive no refresh disparado pela troca de prefers-reduced-motion.
    -------------------------------------------------------------------------- */
+// Único lugar onde o alcance é declarado — nunca duplicar o número (§9).
+const ALCANCE_PARALLAX = 0.16;
+
 let tweensParallax = [];
 
 function construirParallax() {
@@ -246,9 +262,9 @@ function construirParallax() {
 
     const tween = gsap.fromTo(
       foto,
-      { y: () => -(media.offsetHeight * 0.12) },
+      { y: () => -(media.offsetHeight * ALCANCE_PARALLAX) },
       {
-        y: () => media.offsetHeight * 0.12,
+        y: () => media.offsetHeight * ALCANCE_PARALLAX,
         ease: "none",
         scrollTrigger: {
           trigger: dobra,
