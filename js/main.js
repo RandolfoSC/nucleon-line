@@ -172,12 +172,30 @@ function initArcoDeLuz() {
    das seções; as próprias dobras já resolvem sua tinta pelo seletor genérico
    [data-tema="escuro"] do tokens.css.
 
-   VIRADA_TEMA não é um número solto: 35% da altura da tela é exatamente o meio
-   da janela do Arco de Luz (D4 a 70% → D4 no topo), o instante em que o fundo
-   global cruza o meio-tom. Virar antes jogaria tinta clara sobre fundo claro.
-   Se a janela do arco mudar, este valor muda junto.
-   -------------------------------------------------------------------------- */
-const VIRADA_TEMA = "35%";
+   VIRADA_TEMA não é um número solto — mas também NÃO é "o meio matemático da
+   janela do Arco" (essa era a lógica original, e estava errada). Correção
+   auditada (mobile real, ago/2026): interpolação linear de RGB não é
+   perceptualmente uniforme, e o WCAG pesa canais de forma não-linear —
+   então "50% do progresso" cai bem mais perto do extremo escuro do que
+   parece (a cor no meio do trajeto, #3A4150, já tem luminância WCAG de
+   ~0,053, não ~0,5). Com VIRADA_TEMA=35% (=50% de progresso), a tinta
+   escura ficava sobre esse fundo já quase-escuro: contraste 1.8:1, uma
+   falha severa de acessibilidade, mais perceptível em mobile porque um
+   swipe cobre esse trecho todo de uma vez.
+   Medido numericamente: existe uma "zona morta" de ~3,6% do progresso do
+   arco (entre ~34% e ~37%) onde NENHUMA das duas tintas atinge 4.5:1 contra
+   o fundo de transição — não há um ponto de troca perfeito com a paleta
+   atual do Arco (--cor-arco-transicao), só um melhor equilíbrio possível.
+   35% → 45% do progresso do arco = ~45% de VIRADA_TEMA (fórmula:
+   X = 70*(1-P)) cai bem no meio dessa zona morta, deixando os dois lados
+   com contraste ~4.1–4.2:1 por uma fração mínima do scroll (~20px) — uma
+   falha muito menor e muito mais breve que os 1.8:1 anteriores, mas ainda
+   assim abaixo do ideal. Corrigir por completo exigiria ajustar a cor de
+   transição do Arco (decisão travada, precisa de sinal da Direção Criativa)
+   ou interpolar a cor do texto em vez de trocar num ponto só — nenhum dos
+   dois foi feito aqui. Se a janela do arco mudar, este valor precisa ser
+   recalculado (não só reescalado) — refaça a auditoria de contraste. */
+const VIRADA_TEMA = "45%";
 
 function initTemaPorDobra() {
   document.querySelectorAll(".dobra[data-tema]").forEach((dobra) => {
