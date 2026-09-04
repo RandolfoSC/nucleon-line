@@ -28,13 +28,13 @@
       <img class="header__logo header__logo--escura" src="assets/svg/logo-nucleon-escuro.svg" alt="Instituto Núcleon-line" width="658" height="154" />
     </a>
     <nav class="header__nav" id="header-nav" aria-label="Navegação principal">
-      <a href="#dobra-3">Método</a>
-      <a href="#dobra-4">Empresas</a>
-      <a href="#dobra-5">Gestão Pública</a>
+      <a href="#dobra-2">Sobre</a>
+      <a href="#dobra-4">Cursos</a>
+      <a href="#dobra-6">Apoie</a>
     </nav>
 
     <div class="header__acoes">
-      <a class="cta cta--compacto" href="#dobra-6">Inscreva-se</a>
+      <a class="cta cta--compacto" href="pages/inscricao.html">Inscreva-se</a>
       <!-- Abaixo de 640px este botão é o substituto acessível da nav horizontal -->
       <button class="header__toggle" type="button"
               id="header-toggle"
@@ -49,119 +49,210 @@
 
   <main>
 
-    <!-- ============ DOBRA 1 · HERO — O DESPERTAR ============ -->
+    <!-- ============ DOBRA 1 · HERO — O DESPERTAR (v1.1: vídeo real) ============
+         Substitui a foto estática por um vídeo real (assets/video/hero.mp4,
+         16:9, a jovem ocupa o lado direito do quadro original). Reaproveita a
+         MESMA técnica de overscan+parallax das fotos (classe .dobra__foto:
+         height 130% + object-fit:cover dentro de .dobra__media overflow:hidden)
+         — o vídeo herda a folga de ±16% do parallax sem revelar borda, porque
+         object-fit:cover sempre preenche a caixa de 130%, dando o mesmo buffer
+         sintético que as fotos ganham por overscan real de composição.
+         Os 3 núcleos flutuantes da versão em foto foram removidos: eram
+         pensados para "mãos orquestrando esferas de luz" sobre uma foto
+         estática — não fazem sentido sobre filmagem real. initOrbitaD1() em
+         main.js já no-opa sozinho sem [data-orbita] na D1 (nada quebrou). -->
     <section class="dobra dobra--hero" id="dobra-1" data-tema="claro">
       <div class="dobra__media" data-parallax>
-        <img class="dobra__foto" src="assets/img/d1-hero.webp" alt="" fetchpriority="high" />
-        <span class="placeholder__nucleo placeholder__nucleo--laranja" data-orbita></span>
-        <span class="placeholder__nucleo placeholder__nucleo--ciano" data-orbita></span>
-        <span class="placeholder__nucleo placeholder__nucleo--verde" data-orbita></span>
+        <!-- Vídeo só entra em telas ≥768px (main.js não decide isso — é
+             puro CSS display:none/block, ver .hero__video/.hero__foto-mobile
+             abaixo). Motivo: testado nos dois breakpoints e o vídeo 16:9
+             forçado numa tela retrato estreita corta TANTO da lateral pra
+             cobrir a altura que ela (a jovem) desaparece do enquadramento
+             por completo — não sobra recorte que a mantenha visível. */
+        <!-- Sem src/autoplay estáticos de propósito: main.js → initHeroVideoResponsivo()
+             só atribui o src (e dá play) quando a tela é ≥768px, e remove o
+             src de volta se a janela encolher pra mobile — sem isso o
+             navegador tentaria baixar o vídeo mesmo com display:none no
+             CSS, so por causa do autoplay, gastando dados de quem nunca
+             vai vê-lo rodar. -->
+        <video class="dobra__foto hero__midia hero__video" muted loop playsinline preload="none" data-src="assets/video/hero.mp4" aria-hidden="true"></video>
+        <!-- Fallback mobile: frame do próprio vídeo (4.5s, o momento do
+             sorriso) pré-recortado (ffmpeg) centrado nela, com margem real
+             nas laterais — mesma lógica de segurança horizontal das outras
+             fotos do site (PROMPTS_FREEPIK.md regra 2), só que aplicada a
+             posteriori porque a fonte é um frame de vídeo, não uma geração
+             já composta com essa margem. -->
+        <img class="dobra__foto hero__midia hero__foto-mobile" src="assets/img/d1-hero-mobile.webp" alt="" aria-hidden="true" />
       </div>
-      <div class="dobra__conteudo">
+      <!-- Scrim horizontal (não o vertical de D3-D6): só a metade esquerda,
+           onde o texto vive, precisa de reforço de contraste sobre a filmagem
+           real. Fica parado — mesmo mecanismo de z-index:-1 do CLAUDE.md §8,
+           não se move com o parallax do vídeo. -->
+      <div class="dobra__scrim dobra__scrim--hero" aria-hidden="true"></div>
+      <div class="dobra__conteudo dobra__conteudo--hero">
         <p class="eyebrow">Núcleo 01 — O Despertar</p>
-        <h1 class="titulo titulo--hero">O mercado não espera.<br />Ele seleciona.</h1>
+        <h1 class="titulo titulo--hero">Educação que abre portas para quem o mercado ainda não enxergou.</h1>
+        <p class="paragrafo">O Instituto Nucleon-line leva capacitação profissional online e acessível a jovens, mulheres e populações vulneráveis de todo o Brasil — direto no celular, onde quer que você esteja.</p>
         <div class="dobra__acoes">
-          <a class="cta cta--primario" href="#dobra-6">Inicie Sua Trajetória</a>
-          <a class="cta cta--saiba-mais" href="pages/em-breve.html" data-scrollback>Saiba Mais</a>
+          <a class="cta cta--primario" href="pages/cursos.html">Quero Estudar</a>
+          <a class="cta cta--saiba-mais" href="pages/apoie.html">Quero Apoiar o Projeto</a>
+        </div>
+      </div>
+      <!-- Logo sobreposta ao vídeo: some/aparece em sincronia com o momento em
+           que ela sorri pro celular (~4s), controlado por main.js →
+           initHeroLogoSync(). Fica FORA de .dobra__conteudo (não deve competir
+           com o bloco de texto) e fora de .dobra__media (não deve se mover
+           com o parallax do vídeo). -->
+      <span class="hero__logo" aria-hidden="true">
+        <img src="assets/svg/logo-nucleon-claro.svg" alt="" width="658" height="154" />
+      </span>
+    </section>
+
+    <!-- ============ DOBRA 2 · SOBRE O INSTITUTO ============
+         v1.2: as Dobras 2-6 originais (imersão do olho, "Você é o Hub",
+         Juxtapose B2B, Gestão Pública B2G, fechamento com loop narrativo)
+         foram substituídas pelos 8 blocos institucionais do documento
+         oficial do cliente (TOPICOS DO SITE 01.docx). O texto de cada
+         bloco abaixo é EXCERTO VERBATIM do documento (nunca parafraseado)
+         — a versão completa de cada seção mora na página interna
+         correspondente (link "Saiba Mais"). Fotos atuais mantidas como
+         placeholder, conforme pedido — nenhuma foto nova foi gerada.
+         initJuxtaposeD4() em main.js fica dormente (sem .placeholder--d4a/b
+         nesta página) — não removido, só sem alvo; ver nota no relatório. -->
+    <section class="dobra" id="dobra-2" data-tema="claro">
+      <div class="dobra__media" data-parallax>
+        <img class="dobra__foto" src="assets/img/d2-olho.webp" alt="" loading="lazy" decoding="async" />
+      </div>
+      <div class="dobra__scrim" aria-hidden="true"></div>
+      <div class="dobra__conteudo">
+        <p class="eyebrow">Núcleo 02 — Sobre o Instituto</p>
+        <h2 class="titulo">Quem somos</h2>
+        <p class="paragrafo">O Instituto Nucleon-line de Educação e Capacitação é uma organização do terceiro setor, sem fins lucrativos, sediada em Palmas – Tocantins, formalmente constituída (CNPJ 44.265.605/0001-32). Atuamos na oferta de cursos livres de capacitação profissional e preparatórios, com foco em inclusão social por meio da educação.</p>
+        <div class="dobra__acoes">
+          <a class="cta cta--saiba-mais" href="pages/sobre.html">Saiba Mais</a>
         </div>
       </div>
     </section>
 
-    <!-- ============ DOBRA 2 · A PORTA DE ENTRADA (imersão pura — sem CTA por decisão de Direção de Arte) ============ -->
-    <section class="dobra dobra--imersao" id="dobra-2" data-tema="claro">
-      <div class="dobra__media" data-parallax>
-        <img class="dobra__foto" src="assets/img/d2-olho.webp" alt="" loading="lazy" decoding="async" />
-      </div>
-      <div class="dobra__conteudo dobra__conteudo--minimo">
-        <p class="eyebrow eyebrow--sozinho">Núcleo 02 — O Ecossistema</p>
-      </div>
-    </section>
-
-    <!-- ============ DOBRA 3 · O DIFERENCIAL — VOCÊ É O HUB ============ -->
+    <!-- ============ DOBRA 3 · O PROJETO ENOBRECER BRASIL ============ -->
     <section class="dobra" id="dobra-3" data-tema="claro">
       <div class="dobra__media" data-parallax>
         <img class="dobra__foto" src="assets/img/d3-hub.webp" alt="" loading="lazy" decoding="async" />
       </div>
       <div class="dobra__scrim" aria-hidden="true"></div>
       <div class="dobra__conteudo">
-        <p class="eyebrow">Núcleo 03 — O Diferencial</p>
-        <h2 class="titulo">Você é o Hub.</h2>
-        <p class="paragrafo">Metodologia ágil que acelera a conexão com as oportunidades reais.</p>
+        <p class="eyebrow">Núcleo 03 — O Projeto Enobrecer Brasil</p>
+        <h2 class="titulo">O Projeto Enobrecer Brasil</h2>
+        <p class="paragrafo">O Enobrecer Brasil é o projeto de capacitação do Instituto Nucleon-line que leva educação profissional a esse público por meio de uma plataforma 100% adaptada para dispositivos móveis, com linguagem acessível e conteúdo prático.</p>
         <div class="dobra__acoes">
-          <a class="cta cta--primario" href="#dobra-6">Conecte-se ao Mercado</a>
-          <a class="cta cta--saiba-mais" href="pages/em-breve.html" data-scrollback>Saiba Mais</a>
+          <a class="cta cta--saiba-mais" href="pages/enobrecer-brasil.html">Saiba Mais</a>
         </div>
       </div>
     </section>
 
-    <!-- ============ DOBRA 4 · PITCH B2B — JUXTAPOSE (pin + scrub, Fase 3 — feito) ============ -->
-    <section class="dobra dobra--juxtapose" id="dobra-4" data-tema="escuro">
-      <div class="dobra__media">
-        <!-- Estado de repouso: split 50/50 estático (ver css/style.css). O
-             pin + a revelação controlada pelo scroll são main.js → initJuxtaposeD4();
-             sob prefers-reduced-motion o JS não roda e este é o resultado final. -->
-        <div class="placeholder placeholder--d4a" aria-hidden="true">
-          <img class="dobra__foto" src="assets/img/d4a-antes.webp" alt="" loading="lazy" decoding="async" />
-          <span class="placeholder__tag">ANTES</span>
-        </div>
-        <div class="placeholder placeholder--d4b" aria-hidden="true">
-          <img class="dobra__foto" src="assets/img/d4b-depois.webp" alt="" loading="lazy" decoding="async" />
-          <span class="placeholder__tag">DEPOIS</span>
-        </div>
-        <div class="juxtapose__divisoria" aria-hidden="true"></div>
+    <!-- ============ DOBRA 4 · CURSOS ============ -->
+    <section class="dobra" id="dobra-4" data-tema="escuro">
+      <div class="dobra__media" data-parallax>
+        <img class="dobra__foto" src="assets/img/d4a-antes.webp" alt="" loading="lazy" decoding="async" />
       </div>
       <div class="dobra__scrim" aria-hidden="true"></div>
       <div class="dobra__conteudo">
-        <p class="eyebrow">Núcleo 04 — Empresas</p>
-        <h2 class="titulo">Treinar custa.<br />Não treinar custa o dobro.</h2>
-        <p class="paragrafo">Transforme o custo do retrabalho no lucro da eficiência.</p>
+        <p class="eyebrow">Núcleo 04 — Cursos</p>
+        <h2 class="titulo">Cursos</h2>
+        <p class="paragrafo">São mais de 180 cursos livres, organizados em diversas áreas, para você aprender no seu tempo, no seu celular, de onde estiver.</p>
         <div class="dobra__acoes">
-          <a class="cta cta--primario" href="#dobra-6">Potencialize Sua Equipe</a>
-          <a class="cta cta--saiba-mais" href="pages/em-breve.html" data-scrollback>Saiba Mais</a>
+          <a class="cta cta--saiba-mais" href="pages/cursos.html">Saiba Mais</a>
         </div>
       </div>
     </section>
 
-    <!-- ============ DOBRA 5 · PITCH B2G — GESTÃO PÚBLICA ============ -->
+    <!-- ============ DOBRA 5 · IMPACTO SOCIAL ============ -->
     <section class="dobra" id="dobra-5" data-tema="escuro">
       <div class="dobra__media" data-parallax>
         <img class="dobra__foto" src="assets/img/d5-legado.webp" alt="" loading="lazy" decoding="async" />
       </div>
       <div class="dobra__scrim" aria-hidden="true"></div>
       <div class="dobra__conteudo">
-        <p class="eyebrow">Núcleo 05 — Gestão Pública</p>
-        <h2 class="titulo">Invista na qualificação.</h2>
-        <p class="paragrafo">Fortaleça sua gestão e construa um legado social.</p>
+        <p class="eyebrow">Núcleo 05 — Impacto Social</p>
+        <h2 class="titulo">Impacto Social</h2>
+        <p class="paragrafo">Cada aluno formado representa uma família com mais oportunidades e uma comunidade mais forte. Veja o que estamos construindo juntos.</p>
         <div class="dobra__acoes">
-          <a class="cta cta--primario" href="#dobra-6">Transforme Sua Cidade</a>
-          <a class="cta cta--saiba-mais" href="pages/em-breve.html" data-scrollback>Saiba Mais</a>
+          <a class="cta cta--saiba-mais" href="pages/impacto-social.html">Saiba Mais</a>
         </div>
       </div>
     </section>
 
-    <!-- ============ DOBRA 6 · FECHAMENTO — A 4ª PAREDE ============ -->
-    <section class="dobra dobra--final" id="dobra-6" data-tema="escuro">
+    <!-- ============ DOBRA 6 · APOIE O INSTITUTO ============ -->
+    <section class="dobra" id="dobra-6" data-tema="escuro">
       <div class="dobra__media" data-parallax>
-        <div class="placeholder placeholder--d6" aria-hidden="true">
-          <img class="dobra__foto" src="assets/img/d6-mentor.webp" alt="" loading="lazy" decoding="async" />
-          <span class="placeholder__nucleo placeholder__nucleo--laranja placeholder__nucleo--grande"></span>
-        </div>
+        <img class="dobra__foto" src="assets/img/d4b-depois.webp" alt="" loading="lazy" decoding="async" />
       </div>
       <div class="dobra__scrim" aria-hidden="true"></div>
-      <div class="dobra__conteudo dobra__conteudo--central dobra__conteudo--superior">
-        <p class="eyebrow">Núcleo 06 — A Sua Vez</p>
-        <h2 class="titulo titulo--hero">Chegou a sua vez<br />de estar no centro.</h2>
+      <div class="dobra__conteudo">
+        <p class="eyebrow">Núcleo 06 — Apoie o Instituto</p>
+        <h2 class="titulo">Apoie o Instituto</h2>
+        <p class="paragrafo">Sua contribuição transforma vidas. Ajude o Instituto Nucleon-line a levar educação de qualidade a quem mais precisa.</p>
         <div class="dobra__acoes">
-          <a class="cta cta--master" href="pages/inscricao.html">Inscreva-se no Hub Agora</a>
+          <a class="cta cta--primario" href="pages/apoie.html">Quero Doar</a>
+          <a class="cta cta--saiba-mais" href="pages/apoie.html">Saiba Mais</a>
         </div>
-        <a class="link-hub" href="pages/hub-ia.html">Conheça o Hub</a>
+      </div>
+    </section>
+
+    <!-- ============ DOBRA 7 · TRANSPARÊNCIA ============ -->
+    <section class="dobra" id="dobra-7" data-tema="escuro">
+      <div class="dobra__media" data-parallax>
+        <img class="dobra__foto" src="assets/img/d5-legado.webp" alt="" loading="lazy" decoding="async" />
+      </div>
+      <div class="dobra__scrim" aria-hidden="true"></div>
+      <div class="dobra__conteudo">
+        <p class="eyebrow">Núcleo 07 — Transparência</p>
+        <h2 class="titulo">Transparência</h2>
+        <p class="paragrafo">A confiança de doadores, parceiros e da sociedade é a base do nosso trabalho. Por isso, mantemos nossa documentação institucional e financeira acessível.</p>
+        <div class="dobra__acoes">
+          <a class="cta cta--saiba-mais" href="pages/transparencia.html">Saiba Mais</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ DOBRA 8 · BLOG / NOTÍCIAS ============ -->
+    <section class="dobra" id="dobra-8" data-tema="escuro">
+      <div class="dobra__media" data-parallax>
+        <img class="dobra__foto" src="assets/img/d2-olho.webp" alt="" loading="lazy" decoding="async" />
+      </div>
+      <div class="dobra__scrim" aria-hidden="true"></div>
+      <div class="dobra__conteudo">
+        <p class="eyebrow">Núcleo 08 — Blog / Notícias</p>
+        <h2 class="titulo">Blog / Notícias</h2>
+        <p class="paragrafo">Acompanhe as novidades do Instituto Nucleon-line: novas turmas, parcerias fechadas, participação em editais e histórias de impacto.</p>
+        <div class="dobra__acoes">
+          <a class="cta cta--saiba-mais" href="pages/blog.html">Saiba Mais</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ DOBRA 9 · CONTATO ============ -->
+    <section class="dobra" id="dobra-9" data-tema="escuro">
+      <div class="dobra__media" data-parallax>
+        <img class="dobra__foto" src="assets/img/d6-mentor.webp" alt="" loading="lazy" decoding="async" />
+      </div>
+      <div class="dobra__scrim" aria-hidden="true"></div>
+      <div class="dobra__conteudo">
+        <p class="eyebrow">Núcleo 09 — Contato</p>
+        <h2 class="titulo">Contato</h2>
+        <p class="paragrafo">Quer saber mais sobre o Instituto Nucleon-line, tirar dúvidas sobre os cursos ou propor uma parceria? Fale com a gente.</p>
+        <div class="dobra__acoes">
+          <a class="cta cta--primario" href="pages/contato.html">Falar com a Equipe</a>
+          <a class="cta cta--saiba-mais" href="pages/contato.html">Saiba Mais</a>
+        </div>
       </div>
     </section>
 
   </main>
 
   <footer class="rodape" data-tema="escuro">
-    <p>© 2026 Instituto Núcleon-line · Estude o que dá retorno real.</p>
+    <p>© 2026 Instituto Nucleon-line de Educação e Capacitação · CNPJ 44.265.605/0001-32 · Palmas – TO</p>
+    <p><a href="pages/hub-ia.html">Conheça o Hub de IA</a> · <a href="pages/inscricao.html">Inscreva-se</a></p>
   </footer>
 
   <!-- GSAP + ScrollTrigger + ScrollToPlugin (CDN) -->

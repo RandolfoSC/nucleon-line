@@ -255,29 +255,37 @@ let tweensParallax = [];
 
 function construirParallax() {
   document.querySelectorAll(".dobra__media[data-parallax]").forEach((media) => {
-    const foto = media.querySelector(".dobra__foto");
     const dobra = media.closest(".dobra");
-    if (!foto || !dobra) return;
+    if (!dobra) return;
 
-    gsap.set(foto, { xPercent: -50, yPercent: -50 });
+    // querySelectorAll, não querySelector: a D1 (v1.1) tem DOIS candidatos
+    // na mesma .dobra__media — o vídeo (.hero__video) e o fallback estático
+    // mobile (.hero__foto-mobile) — e o CSS decide via display:none/block
+    // qual aparece em cada largura de tela (§ HERO EM VÍDEO). Animar os
+    // dois em paralelo é inofensivo: o que estiver com display:none não
+    // é pintado, e destruirParallax() já fazia essa varredura completa
+    // (era só construirParallax() que ainda pegava um único elemento).
+    media.querySelectorAll(".dobra__foto").forEach((foto) => {
+      gsap.set(foto, { xPercent: -50, yPercent: -50 });
 
-    const tween = gsap.fromTo(
-      foto,
-      { y: () => -(media.offsetHeight * ALCANCE_PARALLAX) },
-      {
-        y: () => media.offsetHeight * ALCANCE_PARALLAX,
-        ease: "none",
-        scrollTrigger: {
-          trigger: dobra,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: true,
-          invalidateOnRefresh: true,
-        },
-      }
-    );
+      const tween = gsap.fromTo(
+        foto,
+        { y: () => -(media.offsetHeight * ALCANCE_PARALLAX) },
+        {
+          y: () => media.offsetHeight * ALCANCE_PARALLAX,
+          ease: "none",
+          scrollTrigger: {
+            trigger: dobra,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true,
+            invalidateOnRefresh: true,
+          },
+        }
+      );
 
-    tweensParallax.push(tween);
+      tweensParallax.push(tween);
+    });
   });
 }
 
@@ -368,6 +376,70 @@ function initOrbitaD1() {
   aoMudarMovimento((reduzido) => {
     if (reduzido) destruirOrbitaD1();
     else construirOrbitaD1();
+  });
+}
+
+/* --------------------------------------------------------------------------
+   LOGO SINCRONIZADA AO HERO EM VÍDEO (D1 · v1.1)
+   Aos 4s do vídeo (momento em que ela sorri olhando pro celular), a logo
+   sobreposta (.hero__logo) faz fade-in via classe CSS (~0.6s, --transicao-tema).
+   Como o vídeo está em loop, o mesmo listener de timeupdate resolve o
+   fade-out sozinho: ao reiniciar, currentTime volta a ficar abaixo de 4s,
+   a classe é removida, e a transição de opacity cuida do fade suave — sem
+   precisar detectar o evento de loop à parte (o <video> não emite um
+   evento nativo confiável pra isso).
+   Não depende do guard de prefers-reduced-motion (§6): é troca de opacity
+   sincronizada ao tempo do vídeo, não parallax/scroll — o mesmo raciocínio
+   que mantém o Arco de Luz ativo sob movimento reduzido (é cor/estado, não
+   deslocamento).
+   -------------------------------------------------------------------------- */
+const MOMENTO_LOGO_HERO = 4; // segundos — ver nota de composição do vídeo
+
+/* --------------------------------------------------------------------------
+   VÍDEO DO HERO SÓ EM DESKTOP (D1 · v1.1)
+   Testado nos dois breakpoints (CLAUDE.md exige): um vídeo 16:9 forçado a
+   cobrir uma tela retrato estreita precisa cortar tanto da lateral pra
+   cobrir a altura que ela (a jovem) some do enquadramento por completo —
+   por isso <768px usa o fallback estático (.hero__foto-mobile, ver CSS).
+   O <video> nasce sem `src` (só `data-src`) e sem `autoplay`: um <video>
+   com autoplay começa a baixar dados assim que o navegador processa a tag,
+   MESMO com display:none no CSS — só esconder visualmente não evita o
+   gasto de dados de quem está no fallback mobile. Atribuir o src (e dar
+   play) só quando a media query bate é o que garante que o vídeo nunca é
+   baixado por quem nunca vai vê-lo rodar; encolher a janela de volta pro
+   mobile remove o src e libera o buffer já baixado.
+   -------------------------------------------------------------------------- */
+function initHeroVideoResponsivo() {
+  const video = document.querySelector(".hero__video");
+  if (!video) return;
+
+  const src = video.dataset.src;
+  const consultaDesktop = window.matchMedia("(min-width: 768px)");
+
+  function sincronizar(desktop) {
+    if (desktop) {
+      if (!video.getAttribute("src")) video.src = src;
+      video.play().catch(() => {}); // sem gesto do usuário alguns navegadores recusam — fallback visual já é o primeiro frame do próprio vídeo
+    } else {
+      video.pause();
+      if (video.getAttribute("src")) {
+        video.removeAttribute("src");
+        video.load(); // libera o buffer já baixado
+      }
+    }
+  }
+
+  sincronizar(consultaDesktop.matches);
+  consultaDesktop.addEventListener("change", (evento) => sincronizar(evento.matches));
+}
+
+function initHeroLogoSync() {
+  const video = document.querySelector(".hero__video");
+  const logo = document.querySelector(".hero__logo");
+  if (!video || !logo) return;
+
+  video.addEventListener("timeupdate", () => {
+    logo.classList.toggle("hero__logo--visivel", video.currentTime >= MOMENTO_LOGO_HERO);
   });
 }
 
@@ -514,6 +586,8 @@ initArcoDeLuz();
 initTemaPorDobra();
 initParallax();
 initOrbitaD1();
+initHeroVideoResponsivo();
+initHeroLogoSync();
 initJuxtaposeD4();
 initAncorasSuaves();
 

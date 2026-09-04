@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contato — Instituto Núcleon-line</title>
+  <meta name="description" content="Quer saber mais sobre o Instituto Nucleon-line, tirar dúvidas sobre os cursos ou propor uma parceria? Fale com a gente." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="../css/tokens.css" />
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<!-- Formulário simulado: mesmo padrão de pages/inscricao.html — nenhum dado
+     é lido, transmitido ou salvo, só troca o estado visual pra confirmação. -->
+<body data-tema="escuro">
+
+  <header class="header hub-topo">
+    <a class="header__marca" href="../index.html" aria-label="Instituto Núcleon-line — início">
+      <img class="header__logo header__logo--clara" src="../assets/svg/logo-nucleon-claro.svg" alt="Instituto Núcleon-line" width="658" height="154" />
+      <img class="header__logo header__logo--escura" src="../assets/svg/logo-nucleon-escuro.svg" alt="Instituto Núcleon-line" width="658" height="154" />
+    </a>
+  </header>
+
+  <main class="pagina-interna">
+    <div class="pagina-interna__cabecalho">
+      <p class="eyebrow">Núcleo 09 — Contato</p>
+      <h1 class="titulo">Contato</h1>
+      <p class="paragrafo">Quer saber mais sobre o Instituto Nucleon-line, tirar dúvidas sobre os cursos ou propor uma parceria? Fale com a gente.</p>
+    </div>
+
+    <div class="cartao-inscricao" data-estado="form">
+
+      <div class="inscricao-etapa inscricao-etapa--form">
+        <form class="inscricao-form" id="form-contato" novalidate>
+          <div class="campo">
+            <label for="nome">Nome completo</label>
+            <input type="text" id="nome" name="nome" autocomplete="name" required />
+          </div>
+
+          <div class="campo">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" name="email" autocomplete="email" required />
+          </div>
+
+          <div class="campo">
+            <label for="telefone">Telefone/WhatsApp</label>
+            <input type="tel" id="telefone" name="telefone" autocomplete="tel" placeholder="(63) 91234-5678" required />
+          </div>
+
+          <div class="campo">
+            <label for="assunto">Assunto</label>
+            <select id="assunto" name="assunto" required>
+              <option value="" disabled selected>Selecione uma opção</option>
+              <option value="cursos">Dúvidas sobre cursos</option>
+              <option value="parcerias">Parcerias e patrocínio</option>
+              <option value="doacoes">Doações</option>
+              <option value="imprensa">Imprensa</option>
+              <option value="outros">Outros</option>
+            </select>
+          </div>
+
+          <div class="campo">
+            <label for="mensagem">Mensagem</label>
+            <textarea id="mensagem" name="mensagem" required></textarea>
+          </div>
+
+          <button type="submit" class="cta cta--master">Enviar Mensagem</button>
+        </form>
+      </div>
+
+      <div class="inscricao-etapa inscricao-etapa--sucesso" role="status" tabindex="-1">
+        <span class="nucleo-orbe inscricao-etapa__nucleo" aria-hidden="true"></span>
+        <h2 class="titulo">Mensagem recebida!</h2>
+        <p class="paragrafo">Obrigado por entrar em contato. Em breve alguém da nossa equipe vai te responder.</p>
+      </div>
+
+    </div>
+
+    <div class="pagina-interna__secao pagina-interna__institucional">
+      <h2>Informações institucionais</h2>
+      <p>Instituto Nucleon-line de Educação e Capacitação<br />
+      CNPJ: 44.265.605/0001-32<br />
+      Sede: Palmas – Tocantins</p>
+      <p>Endereço completo, telefone, e-mail institucional e links de redes sociais em breve.</p>
+    </div>
+
+    <div class="pagina-interna__rodape">
+      <a class="link-hub link-hub--voltar" href="../index.html">Voltar à Home</a>
+    </div>
+  </main>
+
+  <script src="../js/contato.js"></script>
+</body>
+</html>

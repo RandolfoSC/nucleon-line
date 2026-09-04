@@ -44,6 +44,7 @@ const TIPOS_MIME = {
   ".svg": "image/svg+xml",
   ".webp": "image/webp",
   ".json": "application/json",
+  ".mp4": "video/mp4",
 };
 
 function servirArquivoEstatico(req, res) {
@@ -58,14 +59,39 @@ function servirArquivoEstatico(req, res) {
     return res.end("Proibido");
   }
 
-  fs.readFile(caminhoArquivo, (erro, conteudo) => {
+  fs.stat(caminhoArquivo, (erro, stats) => {
     if (erro) {
       res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
       return res.end("Não encontrado: " + caminhoUrl);
     }
+
     const extensao = path.extname(caminhoArquivo);
-    res.writeHead(200, { "Content-Type": TIPOS_MIME[extensao] || "application/octet-stream" });
-    res.end(conteudo);
+    const tipoConteudo = TIPOS_MIME[extensao] || "application/octet-stream";
+
+    // Vídeo precisa de suporte a Range: sem isso o <video> não consegue dar
+    // seek nem, em alguns navegadores, sequer iniciar o autoplay corretamente.
+    const faixa = req.headers.range;
+    if (faixa) {
+      const [inicioStr, fimStr] = faixa.replace(/bytes=/, "").split("-");
+      const inicio = parseInt(inicioStr, 10);
+      const fim = fimStr ? parseInt(fimStr, 10) : stats.size - 1;
+
+      res.writeHead(206, {
+        "Content-Range": `bytes ${inicio}-${fim}/${stats.size}`,
+        "Accept-Ranges": "bytes",
+        "Content-Length": fim - inicio + 1,
+        "Content-Type": tipoConteudo,
+      });
+      fs.createReadStream(caminhoArquivo, { start: inicio, end: fim }).pipe(res);
+      return;
+    }
+
+    res.writeHead(200, {
+      "Content-Type": tipoConteudo,
+      "Accept-Ranges": "bytes",
+      "Content-Length": stats.size,
+    });
+    fs.createReadStream(caminhoArquivo).pipe(res);
   });
 }
 

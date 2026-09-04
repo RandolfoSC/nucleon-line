@@ -429,6 +429,116 @@ body[data-tema="escuro"] { background: var(--cor-deep-dark); }
   object-fit: cover;
 }
 
+/* ==========================================================================
+   HERO EM VÍDEO (D1 · v1.1) — assets/video/hero.mp4 (≥768px) com fallback
+   estático em mobile (<768px) — ver .hero__foto-mobile mais abaixo.
+   O vídeo herda TODA a mecânica de .dobra__foto acima (posição, 130% de
+   altura, object-fit:cover) — é o que dá o buffer de overscan sintético
+   para o parallax: como cover SEMPRE preenche a caixa, mover essa caixa
+   dentro do container (overflow:hidden) nunca revela vazio dentro do
+   alcance já auditado de ±16% (main.js § Parallax) — o vídeo não precisa de
+   overscan próprio, ao contrário das fotos (decisão 5 do CLAUDE.md), porque
+   o buffer aqui é 100% CSS, não composição da mídia.
+   ========================================================================== */
+.hero__midia {
+  /* .dobra__foto (herdada) só alarga a ALTURA pra 130% — certo pra fotos,
+     que já têm overscan real na própria composição (decisão 5 do
+     CLAUDE.md). Numa mídia sem esse overscan, alargar só a altura distorce
+     a proporção da caixa (W / 1.3H fica bem mais "quadrada" que o
+     original) e object-fit:cover, pra cobrir essa caixa deformada, precisa
+     cortar muito mais da LARGURA do que cortaria pra só preencher o
+     container — é esse corte extra (não o parallax em si) que ameaça
+     empurrar o sujeito pra fora do quadro (medido: ~34% do vídeo cortado
+     na largura contra ~1% com este fix, no mesmo container de teste).
+     Alargar os DOIS eixos igualmente preserva a proporção original da
+     caixa (W/H = a mesma do container), então cover corta o mínimo
+     necessário pra cobrir a tela — e ainda sobra 15% de folga em todos os
+     lados pro parallax, do mesmo jeito que a altura sozinha sobra pras
+     fotos com overscan real. Vale tanto pro vídeo quanto pro frame estático
+     do fallback mobile (.hero__foto-mobile), que reaproveita esta classe. */
+  width: 130%;
+  height: 130%;
+}
+
+/* Troca vídeo↔foto por largura de tela — ver comentário no HTML sobre por
+   que o vídeo não é viável em telas retrato estreitas. 768px é o mesmo
+   corte convencional de "tablet/desktop" já usado como referência no resto
+   do projeto (o menu mobile usa 640px, um pouco mais cedo, porque aquele é
+   um problema de espaço pra nav horizontal — este é um problema de recorte
+   de imagem, mais generoso de propósito). */
+.hero__foto-mobile { display: none; }
+@media (max-width: 767px) {
+  .hero__video        { display: none; }
+  .hero__foto-mobile  { display: block; }
+  /* Sem vídeo tocando (initHeroVideoResponsivo() nem atribui o src abaixo
+     de 768px), não existe timeupdate pra disparar o fade-in — a logo
+     overlay fica reservada à experiência com vídeo. */
+  .hero__logo         { display: none; }
+}
+
+/* Bloco de texto do Hero: ancorado na METADE ESQUERDA da tela (não
+   centralizado como as demais dobras) porque ela ocupa o lado direito do
+   vídeo — texto e sujeito nunca podem disputar o mesmo espaço horizontal.
+   `margin-inline: 0` (em vez do auto padrão de .dobra__conteudo) tira a
+   centralização; sem largura própria que preencha o grid, o item assume a
+   borda inicial (esquerda, LTR) por padrão — reforçado aqui via
+   `justify-self: start` para não depender desse comportamento implícito. */
+.dobra__conteudo--hero {
+  justify-self: start;
+  margin-inline: 0;
+  max-width: min(30rem, 88%);
+}
+@media (max-width: 640px) {
+  /* Mobile retrato: o corte de object-fit:cover é mais agressivo na
+     horizontal (proporção do vídeo 16:9 dentro de um container bem mais
+     alto que largo), então a "área dela" ocupa fatia maior da tela mesmo
+     ancorada à direita — texto mais estreito reduz o risco de invadir essa
+     fatia. Testado em 390px sem sobreposição (ver nota de verificação). */
+  .dobra__conteudo--hero {
+    max-width: 78%;
+  }
+}
+
+/* Scrim horizontal do Hero — variante de .dobra__scrim (que por padrão é
+   vertical, topo↕base, usado em D3-D6). Aqui o gradiente é esquerda→direita:
+   só a metade onde o texto mora precisa de reforço de contraste sobre a
+   filmagem real (ao contrário da foto branca-de-estúdio que D1 tinha antes,
+   um vídeo tem cores e sombras imprevisíveis). Mantém o mesmo mecanismo de
+   z-index:-1 e posição no DOM (depois de .dobra__media, antes de
+   .dobra__conteudo) descrito no CLAUDE.md §8: fica parado, nunca se move
+   com o parallax do vídeo. */
+.dobra__scrim--hero {
+  background: linear-gradient(to right,
+    color-mix(in srgb, var(--cor-branco-luminoso) 82%, transparent) 0%,
+    color-mix(in srgb, var(--cor-branco-luminoso) 58%, transparent) 34%,
+    transparent 60%);
+}
+
+/* Logo sobreposta ao vídeo — aparece/some em sincronia com o momento em que
+   ela sorri pro celular (main.js → initHeroLogoSync()). Fica sobre a
+   filmagem crua (não sobre o scrim, que cobre só a metade esquerda), por
+   isso usa a versão CLARA (tinta branca) com drop-shadow — não dá pra
+   prever a luminosidade exata do vídeo naquele ponto, e um logo branco com
+   sombra lê bem sobre a maioria dos fundos fotográficos. */
+.hero__logo {
+  position: absolute;
+  right: clamp(1.5rem, 4vw, 3rem);
+  bottom: clamp(1.5rem, 4vw, 3rem);
+  width: clamp(5.5rem, 11vw, 8.5rem);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transicao-tema);
+  filter: drop-shadow(0 2px 14px rgba(0, 0, 0, 0.45));
+}
+.hero__logo img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.hero__logo--visivel {
+  opacity: 1;
+}
+
 .placeholder--d6 {
   /* Composição travada (CLAUDE.md §2, decisão 7): o orbe vive na faixa
      inferior, nunca no centro — é lá que o texto de fechamento mora agora.
@@ -518,7 +628,15 @@ body[data-tema="escuro"] { background: var(--cor-deep-dark); }
   text-align: center;
   color: var(--tinta-suave);
   font-size: 0.88rem;
+  display: grid;
+  gap: var(--espaco-1);
 }
+.rodape a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.rodape a:hover { color: var(--tinta-forte); }
 
 /* ==========================================================================
    ACESSIBILIDADE — LEI do projeto
@@ -828,7 +946,8 @@ body[data-tema="escuro"] { background: var(--cor-deep-dark); }
   color: var(--tinta-suave);
 }
 .campo input,
-.campo select {
+.campo select,
+.campo textarea {
   /* width:100% + min-width:0 é a correção de raiz do estouro horizontal:
      sem largura própria, o <select> assume seu tamanho preferido nativo —
      que em telas estreitas, com uma opção longa como "Gestão Pública —
@@ -846,12 +965,20 @@ body[data-tema="escuro"] { background: var(--cor-deep-dark); }
   color: var(--tinta-forte);
   transition: border-color var(--transicao-micro), box-shadow var(--transicao-micro);
 }
-.campo input::placeholder { color: var(--tinta-suave); }
+.campo input::placeholder,
+.campo textarea::placeholder { color: var(--tinta-suave); }
 .campo input:focus-visible,
-.campo select:focus-visible {
+.campo select:focus-visible,
+.campo textarea:focus-visible {
   outline: none;
   border-color: var(--cor-ciano);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--cor-ciano) 25%, transparent);
+}
+.campo textarea {
+  resize: vertical;
+  min-height: 7rem;
+  border-radius: 1.25rem; /* pílula (--raio-cta) fica estranha numa caixa alta — raio menor, mesma família visual */
+  font-family: inherit;
 }
 /* Normaliza a seta nativa do <select> para não brigar com o resto da UI —
    dois gradientes formando um "v", cor do token de tinta suave. */
@@ -993,4 +1120,124 @@ button.cta {
   .orbita__nucleo {
     transform: translate(-50%, -50%) translateX(var(--orbita-raio));
   }
+}
+
+/* ==========================================================================
+   SCRIM DO HERO MOBILE (D1 · v1.1 — correção de contraste)
+   O fallback estático mobile (.hero__foto-mobile) é foto real (não um
+   fundo branco de estúdio), e a v1.1 empilha eyebrow+título+subtítulo+2
+   CTAs por cima dela em coluna única (sem "metade livre" como no desktop
+   com vídeo — ver decisão travada 8, CLAUDE.md §2). Testado sem scrim: a
+   tinta escura padrão da D1 (`data-tema="claro"`) não garante 4.5:1 contra
+   um fundo fotográfico de luminância variável. Correção: SÓ no mobile
+   (<768px), (1) o texto do Hero muda pra tinta clara — sobrescrevendo
+   --tinta-forte/--tinta-suave localmente em .dobra__conteudo--hero, sem
+   tocar data-tema="claro" da seção (isso quebraria o Arco de Luz/Header
+   Smart, que leem data-tema pra decidir a cor do resto da UI) — e (2) um
+   scrim escuro de baixo pra cima (mesma técnica/mesma cor de base do
+   `.dobra__scrim` genérico em tema escuro, CLAUDE.md §8) cobre a faixa
+   onde o texto vive. Medido (canvas, luminância WCAG) no frame real
+   (d1-hero-mobile.webp) em 375px e 390px: pior caso do texto tinta clara
+   sobre o scrim ≥ 8:1 — folga generosa acima do mínimo de 4.5:1, com
+   margem porque o gradiente não lava a foto inteira (transparente até a
+   faixa do eyebrow, a jovem continua visível sem véu no terço superior). */
+@media (max-width: 767px) {
+  .dobra--hero .dobra__conteudo--hero {
+    --tinta-forte: #F2F5F9;
+    --tinta-suave: rgba(242, 245, 249, 0.72);
+    /* .titulo não declara `color` próprio — herda de .dobra, que já resolveu
+       --tinta-forte no escopo DELE (mais acima, ainda com o valor escuro
+       original). Redefinir só a custom property aqui não alcança o título
+       por herança; precisa redeclarar `color` explicitamente NESTE escopo
+       pra ele reavaliar var(--tinta-forte) já com o valor claro de cima. */
+    color: var(--tinta-forte);
+  }
+  /* .cta--primario usa --tinta-forte como BACKGROUND (não como cor de
+     texto) — a redefinição acima, pensada só pro texto corrido, vazava pro
+     botão e virava fundo quase-branco com texto quase-branco (a mesma
+     combinação que [data-tema="escuro"] .cta--primario já resolve em
+     qualquer outra dobra escura do site — só falta aplicar aqui, porque a
+     D1 continua data-tema="claro" no HTML). */
+  .dobra--hero .dobra__conteudo--hero .cta--primario {
+    background: var(--cor-deep-dark);
+    color: var(--cor-branco-luminoso);
+  }
+  .dobra--hero .dobra__scrim--hero {
+    /* Calibrado por medição (canvas, luminância WCAG, pixel a pixel) contra
+       o frame real (d1-hero-mobile.webp), cobrindo a região onde o texto
+       de fato mora (eyebrow começa a 13,4% da altura da dobra, botões
+       terminam a 94,5% — medido via getBoundingClientRect, mesmo método do
+       CLAUDE.md §8.2). Primeira tentativa (transparente até 30%) deixava o
+       eyebrow — que começa a 13,4% — sem proteção nenhuma: nessa faixa a
+       foto tem uma janela clara ao fundo (pixel ~241,245,252, quase
+       branco), e texto claro ali cai pra 1,00:1 de contraste (falha total).
+       65% já em 12% resolve exatamente essa faixa: pior caso medido em
+       toda a região de texto (13,4%–94,5%) é 6,27:1 — margem real acima do
+       mínimo de 4,5:1. Sobe suave até 85% em 40% e 92% no final; o topo da
+       dobra (0%–12%, sem texto) continua sem véu, preservando a foto. */
+    background: linear-gradient(to bottom,
+      transparent 0%,
+      color-mix(in srgb, var(--cor-deep-dark) 65%, transparent) 12%,
+      color-mix(in srgb, var(--cor-deep-dark) 85%, transparent) 40%,
+      color-mix(in srgb, var(--cor-deep-dark) 92%, transparent) 100%);
+  }
+}
+
+/* ==========================================================================
+   PÁGINA INTERNA DE CONTEÚDO — pages/sobre.html, enobrecer-brasil.html,
+   cursos.html, impacto-social.html, apoie.html, transparencia.html,
+   blog.html, contato.html.
+   Layout simples de texto corrido (não é scrollytelling): mesmo padrão de
+   app de tela única do Hub IA/Inscrição (header fixo `hub-topo`, tema fixo
+   via data-tema, sem Arco de Luz, sem GSAP), mas em vez de um cartão
+   centralizado, é uma coluna de leitura com as seções oficiais do
+   documento do cliente. Tokens de tipografia/cor reaproveitados das
+   dobras (.eyebrow/.titulo/.paragrafo) — nenhum valor novo inventado.
+   ========================================================================== */
+.pagina-interna {
+  max-width: 42rem;
+  margin-inline: auto;
+  padding: calc(var(--header-altura) + var(--espaco-4)) clamp(1.25rem, 5vw, 2rem) var(--espaco-5);
+  display: grid;
+  gap: var(--espaco-4);
+}
+.pagina-interna__cabecalho { display: grid; gap: var(--espaco-2); }
+.pagina-interna__secao { display: grid; gap: var(--espaco-1); }
+.pagina-interna__secao h2 {
+  font-family: var(--fonte-display);
+  font-weight: 700;
+  font-size: clamp(1.15rem, 1rem + 0.7vw, 1.4rem);
+  margin-top: var(--espaco-1);
+}
+.pagina-interna__secao p,
+.pagina-interna__secao li {
+  color: var(--tinta-suave);
+  line-height: 1.65;
+}
+.pagina-interna__secao ul {
+  padding-left: 1.2rem;
+  display: grid;
+  gap: 0.35rem;
+}
+.pagina-interna__secao ul[data-ordenada] { list-style: decimal; }
+.pagina-interna__rodape {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-3);
+  align-items: center;
+  padding-top: var(--espaco-2);
+  border-top: 1px solid color-mix(in srgb, var(--tinta-suave) 25%, transparent);
+}
+/* Bloco de dados institucionais fixos (CNPJ, sede) — texto menor, discreto */
+.pagina-interna__institucional {
+  font-size: 0.85rem;
+  color: var(--tinta-suave);
+}
+/* Estado vazio do Blog — "em breve" (não há posts reais ainda) */
+.pagina-interna__vazio {
+  border: 1px dashed color-mix(in srgb, var(--tinta-suave) 40%, transparent);
+  border-radius: 1rem;
+  padding: var(--espaco-4);
+  text-align: center;
+  color: var(--tinta-suave);
 }
